@@ -1,21 +1,104 @@
 ﻿@page "/Account/Manage/GetCurrentUser"
+@using BlazorCarRepairsApp.Dto
 
-<div class="row">
-    <div class="col-xl-6">
-        <h2>User Details.</h2>
-        <div class="card" style="width: 18rem;">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">An item</li>
-                <li class="list-group-item">A second item</li>
-                <li class="list-group-item">A third item</li>
-            </ul>
-            <div class="card-footer">
-                Card footer
+@rendermode  InteractiveServer
+
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+@if (UserDetail is null)
+{
+    <p>Loading current user...</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-xl-6">
+            <h2>User Details.</h2>
+            <div class="card" style="width: 18rem;">
+                <ul class="list-group list-group-flush list-group-striped">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-start align-items-center gap-2 w-100">
+                            <span>Name :&ensp; </span>
+                            <span>@UserDetail.Name</span>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-start align-items-center gap-2 w-100">
+                            <span>Email :&emsp; </span>
+                            <span>@UserDetail.Email</span>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-start align-items-center gap-2 w-100">
+                            <span>Phone :&ensp; </span>
+                            <span>@UserDetail.Phone</span>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-start align-items-center gap-2 w-100">
+                            <span>Gender :&nbsp; </span>
+                            <span>@UserDetail.Gender</span>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-start align-items-center gap-2 w-100">
+                            <span>Role :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+                            <span>@UserDetail.Role</span>
+                        </div>
+                    </li>
+                </ul>
+                <div class="card-footer">
+
+                    <button type="button" class="btn btn-outline-primary w-100 fw-bold" @onclick="BackToMain">Back</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
 
 @code {
-    
+    private UserDto? UserDetail { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //----> Get the auth-state
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        //----> Get the current user email
+        var email = authState.User.FindFirstValue(ClaimTypes.Email);
+
+        //----> Get the current user.
+        var user = await UserManager.FindByEmailAsync(email!);
+
+        //----> Check for authenticated user.
+        if (user is null)
+        {
+            throw new CustomException("You must login in!", HttpStatusCode.Unauthorized);
+        }
+
+        //----> Get the user role.
+        var role = (await UserManager.GetRolesAsync(user))[0];
+
+        //----> Populate user-details.
+        UserDetail ??= new UserDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            Name = user.Name,
+            Role = role,
+            Gender = user.Gender,
+            Image = user.ImagePath,
+            Phone = user.PhoneNumber,
+        };
+    }
+
+    private void BackToMain()
+    {
+        NavigationManager.NavigateTo("Account/Manage");
+
+    }
+
 }

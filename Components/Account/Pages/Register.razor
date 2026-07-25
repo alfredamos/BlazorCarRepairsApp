@@ -104,15 +104,18 @@
 
     public async Task RegisterUser(EditContext editContext)
     {
+        //----> Initialize application user
         var user = CreateUser();
 
-        Console.WriteLine("At point 2, user: " + user + "");
-
+        //----> Set Name and email and put email in store
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        
+        //----> Register a new user.
         var result = await UserManager.CreateAsync(user, Input.Password);
 
+        //----> Check for successful creation.
         if (!result.Succeeded)
         {
             _identityErrors = result.Errors;
