@@ -1,6 +1,8 @@
 using BlazorCarRepairsApp.Components;
 using BlazorCarRepairsApp.Components.Account;
 using BlazorCarRepairsApp.Data;
+using BlazorCarRepairsApp.Middleware;
+using BlazorCarRepairsApp.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
         options.SignIn.RequireConfirmedAccount = true;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
+    .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -52,7 +55,15 @@ else
     app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
+
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
+
+//----> Register the custom exception middleware
+app.UseMiddleware<ExceptionMiddleware>();
+
 
 app.UseAntiforgery();
 

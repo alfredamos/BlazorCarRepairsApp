@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using BlazorCarRepairsApp.Models;
 
 namespace BlazorCarRepairsApp.Components.Account
 {

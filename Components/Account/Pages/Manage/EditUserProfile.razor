@@ -1,0 +1,201 @@
+﻿@page "/Account/Manage/Edit-profile"
+
+@* @rendermode InteractiveServer *@
+
+@using System.ComponentModel.DataAnnotations
+@using System.Net
+@using System.Security.Claims
+@using BlazorCarRepairsApp.Exceptions
+@using BlazorCarRepairsApp.Models
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Edit user profile</PageTitle>
+
+@if (Input is null)
+{
+    <p>Loading form...</p>
+}
+else
+{
+    <div class="row">
+    <div class="col-xl-6">
+        <StatusMessage Message="@Message" />
+        <EditForm Model="Input" method="post" OnValidSubmit="ChangeUserProfile" FormName="editProfile">
+            <DataAnnotationsValidator />
+            <h2>Edit user profile.</h2>
+            <hr />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Name" id="Input.Name" class="form-control" autocomplete="name" aria-required="true" placeholder="John Doe" />
+                <label for="Input.Name">Name</label>
+                <ValidationMessage For="() => Input.Name" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <label for="Input.Email">Email</label>
+                <ValidationMessage For="() => Input.Email" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Phone" id="Input.Phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="+234-803-456-7890" />
+                <label for="Input.Phone">Phone</label>
+                <ValidationMessage For="() => Input.Phone" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="off" aria-required="true" placeholder="password" />
+                <label for="Input.Password">Password</label>
+                <ValidationMessage For="() => Input.Password" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.ImagePath" id="Input.ImagePath" class="form-control" autocomplete="imagePath" aria-required="true" placeholder="https://example.com/image.jpg" />
+                <label for="Input.ImagePath">Image</label>
+                <ValidationMessage For="() => Input.ImagePath" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputDate @bind-Value="Input.Birthdate" id="Input.Birthdate" class="form-control" autocomplete="birthdate" aria-required="true" placeholder="April 1, 1984" />
+                <label for="Input.Birthdate">Birthdate</label>
+                <ValidationMessage For="() => Input.Birthdate" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Input.Gender" id="Input.Gender" class="form-select" autocomplete="gender" aria-required="true" placeholder="Male">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </InputSelect>
+                <label for="Input.Gender">Gender</label>
+                <ValidationMessage For="() => Input.Gender" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Input.Role" id="Input.Role" class="form-select" autocomplete="role" aria-required="true" placeholder="User">
+                    <option value="USER">User</option>
+                    <option value="ADMIN">Admin</option>
+                </InputSelect>
+                <label for="Input.Role">Role</label>
+                <ValidationMessage For="() => Input.Role" class="text-danger" />
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+        </EditForm>
+    </div>
+</div>
+
+}
+
+
+@code {
+    private IEnumerable<IdentityError>? _identityErrors;
+    
+    [SupplyParameterFromForm]
+    private InputModel? Input { get; set; }
+
+    private ApplicationUser? User { get; set; }
+    
+    private string? Message => _identityErrors is null ? null : $"Error: {string.Join(", ", _identityErrors.Select(error => error.Description))}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        //----> Get the auth-state.
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        
+        //----> Get the current user email
+        var email = authState.User.FindFirstValue(ClaimTypes.Email);
+        
+        //----> Get the current user.
+        User = await UserManager.FindByEmailAsync(email!);
+        
+        if (User is null)
+        {
+            throw new CustomException("You must login in!", HttpStatusCode.Unauthorized);
+        }
+
+        //----> Populate the input model.
+        Input ??= new InputModel
+        {
+            Email = User.Email!,
+            Name = User.Name,
+            Birthdate = User.Birthdate,
+            Gender = User.Gender,
+            Password = "",
+            Phone = User.PhoneNumber!,
+            ImagePath = User.ImagePath!,
+        };
+        
+    }
+
+    public async Task ChangeUserProfile()
+    { 
+        //----> Check for null input.
+        if (Input is null)
+        {
+            throw new CustomException("Invalid input!", HttpStatusCode.BadRequest); 
+        }
+
+        //----> Check for null User.
+        if (User is null)
+        {
+            throw new CustomException("You must login in!", HttpStatusCode.Unauthorized);
+        }
+        
+        //----> Check for valid password.
+        var isValidPassword = await UserManager.CheckPasswordAsync(User, Input.Password);
+        if (!isValidPassword)
+        {
+            throw new CustomException("Invalid credentials!", HttpStatusCode.Unauthorized);
+        }
+        
+        //----> Update user details.
+        User.Name = Input.Name;
+        User.Email = Input.Email;
+        User.Birthdate = Input.Birthdate;
+        User.Gender = Input.Gender;
+        User.ImagePath = Input.ImagePath;
+        User.PhoneNumber = Input.Phone;
+        var response = await UserManager.UpdateAsync(User);
+        
+        //----> Check if the role was added successfully.
+        if (!response.Succeeded)
+        {
+            _identityErrors = response.Errors;
+            throw new CustomException("User update unsuccessful!", HttpStatusCode.InternalServerError);
+        }
+            
+
+        NavigationManager.NavigateTo("Account/Manage");
+        
+        
+        
+    }
+
+    public class InputModel
+    {
+        [Required, MaxLength(200)]
+        public string Name { get; set; } = string.Empty;
+    
+        [Required]
+        [MaxLength(200)]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+    
+        // [Required]
+        // [MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+    
+        [Required]
+        [MaxLength(20)]
+        [Phone]
+        public string Phone { get; set; } = string.Empty;
+    
+        [Required]
+        [AllowedValues("Male", "Female", ErrorMessage = "Gender must be 'Male', 'Female'.")]
+        public string Gender { get; set; } = string.Empty;
+    
+        [Required]
+        [MaxLength(1000)]
+        public string ImagePath { get; set; } = string.Empty;
+
+        public DateOnly Birthdate { get; set; }
+    
+        public string Role { get; set; } = string.Empty;
+    }
+}

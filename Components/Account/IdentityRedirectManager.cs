@@ -1,4 +1,5 @@
 using BlazorCarRepairsApp.Data;
+using BlazorCarRepairsApp.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 

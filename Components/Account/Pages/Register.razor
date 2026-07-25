@@ -1,13 +1,17 @@
 ﻿@page "/Account/Register"
 
 @using System.ComponentModel.DataAnnotations
+@using System.Net
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-@using BlazorCarRepairsApp.Data
+@using BlazorCarRepairsApp.Exceptions
+@using BlazorCarRepairsApp.Models
+@using BlazorCarRepairsApp.Utils
 
 @inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<ApplicationRole> RoleManager
 @inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IEmailSender<ApplicationUser> EmailSender
@@ -17,20 +21,28 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
-
 <div class="row">
-    <div class="col-lg-6">
+    <div class="col-lg-6 mx-auto">
         <StatusMessage Message="@Message" />
         <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
+            <h2>Create a new user account.</h2>
             <hr />
             <ValidationSummary class="text-danger" role="alert" />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Name" id="Input.Name" class="form-control" autocomplete="name" aria-required="true" placeholder="John Doe" />
+                <label for="Input.Name">Name</label>
+                <ValidationMessage For="() => Input.Name" class="text-danger" />
+            </div>
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                 <label for="Input.Email">Email</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Phone" id="Input.Phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="+234-803-456-7890" />
+                <label for="Input.Phone">Phone</label>
+                <ValidationMessage For="() => Input.Phone" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
@@ -42,28 +54,48 @@
                 <label for="Input.ConfirmPassword">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.ImagePath" id="Input.ImagePath" class="form-control" autocomplete="imagePath" aria-required="true" placeholder="https://example.com/image.jpg" />
+                <label for="Input.ImagePath">Image</label>
+                <ValidationMessage For="() => Input.ImagePath" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputDate @bind-Value="Input.Birthdate" id="Input.Birthdate" class="form-control" autocomplete="birthdate" aria-required="true" placeholder="April 1, 1984" />
+                <label for="Input.Birthdate">Birthdate</label>
+                <ValidationMessage For="() => Input.Birthdate" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Input.Gender" id="Input.Gender" class="form-select" autocomplete="gender" aria-required="true" placeholder="Male">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </InputSelect>
+                <label for="Input.Gender">Gender</label>
+                <ValidationMessage For="() => Input.Gender" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Input.Role" id="Input.Role" class="form-select" autocomplete="role" aria-required="true" placeholder="User">
+                    <option value="USER">User</option>
+                    <option value="ADMIN">Admin</option>
+                </InputSelect>
+                <label for="Input.Role">Role</label>
+                <ValidationMessage For="() => Input.Role" class="text-danger" />
+            </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
     </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
+    
 </div>
 
 @code {
-    private IEnumerable<IdentityError>? identityErrors;
+    private IEnumerable<IdentityError>? _identityErrors;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = default!;
+    private InputModel Input { get; set; } = null!;
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+    private string? Message => _identityErrors is null ? null : $"Error: {string.Join(", ", _identityErrors.Select(error => error.Description))}";
 
     protected override void OnInitialized()
     {
@@ -74,6 +106,8 @@
     {
         var user = CreateUser();
 
+        Console.WriteLine("At point 2, user: " + user + "");
+
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -81,9 +115,22 @@
 
         if (!result.Succeeded)
         {
-            identityErrors = result.Errors;
+            _identityErrors = result.Errors;
             return;
         }
+        
+        //----> Check if a user role exists. If not, create it
+        if (!await RoleManager.RoleExistsAsync(Input.Role))
+        {
+            await RoleManager.CreateAsync(new ApplicationRole { Name = Roles.User, Description = "Default Role" });
+        }
+
+        //----> Add user to the role if successful.
+        var response = await UserManager.AddToRoleAsync(user, Roles.User);
+        
+        //----> Check if the role was added successfully.
+        if (!response.Succeeded)
+            throw new CustomException("Error adding user to role.", HttpStatusCode.BadRequest);
 
         Logger.LogInformation("User created a new account with password.");
 
@@ -113,7 +160,17 @@
     {
         try
         {
-            return Activator.CreateInstance<ApplicationUser>();
+            var user = new ApplicationUser
+            {
+                Name = Input.Name,
+                Email = Input.Email,
+                PhoneNumber = Input.Phone,
+                ImagePath = Input.ImagePath,
+                Birthdate = Input.Birthdate,
+                Gender = Input.Gender
+            };
+            Console.WriteLine("At point 1, user: " + user + "");
+            return user;
         }
         catch
         {
@@ -134,15 +191,37 @@
     private sealed class InputModel
     {
         [Required]
+        [Display(Name = "Name")]
+        public string Name { get; set; } = "";
+        
+        [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
+        
+        [Required]
+        [Display(Name = "Phone")]
+        public string Phone { get; set; } = "";
+        
+        [Required]
+        [Display(Name = "Gender")]
+        public string Gender { get; set; } = "";
+        
+        [Required]
+        [Display(Name = "ImagePath")]
+        public string ImagePath { get; set; } = "";
+        
+        [Required]
+        [Display(Name = "Birthdate")]
+        public DateOnly Birthdate { get; set; }
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; } = "";
+
+        public string Role { get; set; } = Roles.User;
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
