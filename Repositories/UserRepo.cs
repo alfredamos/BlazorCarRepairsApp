@@ -100,7 +100,7 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
     {
         //----> Fetch the user with the given id.
         //var user = await userManager.Users.AsNoTracking().FirstOrDefaultAsync(ust => ust.Id == id);
-        var user = await userManager.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id.ToString());
      
         //----> Return the user.
         return user ?? throw new CustomException("User not found", HttpStatusCode.NotFound);

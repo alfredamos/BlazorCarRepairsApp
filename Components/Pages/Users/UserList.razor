@@ -20,7 +20,7 @@ else
     <UserTable 
         Users="_users" 
         OnChangeUserRole="ChangeUserRole"
-        OnDeleteUser="DeleteUser"
+        OnConfirmDelete="DeleteUser"
         OnDetailUser="DetailUser"
         
     />
@@ -43,10 +43,6 @@ else
         }
     }
 
-    private async Task DeleteUser(Guid id)
-    {
-        Console.WriteLine($"Deleting user with id {id}");
-    }
     private async Task ChangeUserRole(string email)
     {
         Console.WriteLine($"Change the role of user with email {email}");
@@ -57,5 +53,11 @@ else
     private async Task DetailUser(Guid id)
     {
         Console.WriteLine($"Getting user with id {id}");
+    }
+
+    private async Task DeleteUser(Guid id)
+    {
+        await UserRepo.DeleteUserById(id);
+        _users = await UserRepo.GetAllUsers();
     }
 }

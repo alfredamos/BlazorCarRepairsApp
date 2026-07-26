@@ -1,5 +1,26 @@
-﻿<h3>Modal</h3>
+﻿@* Force display using CSS styles because Blazor handles the DOM insertion *@
+<div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5);" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@ModalTitle</h5>
+                <button type="button" class="btn-close" @onclick="OnCancelClick"></button>
+            </div>
+            <div class="modal-body">
+                @ModalMessage
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="OnCancelClick">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="OnDeleteClick">@BtnMessage</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
-    
+    [Parameter] public string ModalTitle { get; set; } = null!;
+    [Parameter] public string ModalMessage { get; set; } = null!;
+    [Parameter] public string BtnMessage { get; set; } = null!;
+    [Parameter] public EventCallback OnDeleteClick { get; set; }
+    [Parameter] public EventCallback OnCancelClick { get; set; }
 }
