@@ -8,5 +8,6 @@ public class UserDto
     public string Role { get; set; } = string.Empty;
     public string? Image { get; set; } = string.Empty;
     public string? Phone { get; set; } = string.Empty;
+    public DateOnly Birthdate { get; set; }
     public string Gender { get; set; } = string.Empty; 
 }

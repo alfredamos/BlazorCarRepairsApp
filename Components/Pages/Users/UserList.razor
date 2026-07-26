@@ -1,0 +1,61 @@
+﻿@page "/users"
+
+@inject IUserRepo UserRepo
+@inject NavigationManager NavigationManager
+
+@attribute [Authorize(Roles = Roles.Admin)]
+
+<PageTitle>Users</PageTitle>
+
+@if (_users is null)
+{
+    <p>Loading users...</p>
+}
+else if (!_users.Any())
+{
+    <p>No users found.</p>
+}
+else
+{
+    <UserTable 
+        Users="_users" 
+        OnChangeUserRole="ChangeUserRole"
+        OnDeleteUser="DeleteUser"
+        OnDetailUser="DetailUser"
+        
+    />
+}
+
+@code {
+    private List<UserDto>? _users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _users = await UserRepo.GetAllUsers() ?? new List<UserDto>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database Error: {ex.Message}");
+            
+            _users = new List<UserDto>(); // Fallback to empty list to stop the loading loop
+        }
+    }
+
+    private async Task DeleteUser(Guid id)
+    {
+        Console.WriteLine($"Deleting user with id {id}");
+    }
+    private async Task ChangeUserRole(string email)
+    {
+        Console.WriteLine($"Change the role of user with email {email}");
+        await UserRepo.ChangeUserRole(email);
+        _users = await UserRepo.GetAllUsers();
+    }
+    
+    private async Task DetailUser(Guid id)
+    {
+        Console.WriteLine($"Getting user with id {id}");
+    }
+}

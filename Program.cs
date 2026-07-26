@@ -1,8 +1,10 @@
 using BlazorCarRepairsApp.Components;
 using BlazorCarRepairsApp.Components.Account;
+using BlazorCarRepairsApp.Contracts.Users;
 using BlazorCarRepairsApp.Data;
 using BlazorCarRepairsApp.Middleware;
 using BlazorCarRepairsApp.Models;
+using BlazorCarRepairsApp.Repositories;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,9 @@ builder.Services.AddRazorComponents()
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+//----> Repositories.
+builder.Services.AddScoped<IUserRepo, UserRepo>();
 
 builder.Services.AddAuthentication(options =>
     {

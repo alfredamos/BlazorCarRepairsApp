@@ -17,7 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Account\Pages\Users\" />
+    <_ContentIncludedByDefault Remove="Components\Account\Pages\Users\UserList.razor" />
+    <_ContentIncludedByDefault Remove="Components\Account\Pages\Users\UserTable.razor" />
   </ItemGroup>
 
 </Project>

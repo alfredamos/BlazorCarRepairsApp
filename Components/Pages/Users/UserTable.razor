@@ -1,0 +1,63 @@
+﻿<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">Image</th>
+        <th scope="col">Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Phone</th>
+        <th scope="col">Birthdate</th>
+        <th scope="col">Gender</th>
+        <th scope="col">Role</th>
+        <th scope="col">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Users)
+    {
+        <tr>
+            <td><img src="@user.Image" alt="@user.Name" style="max-width: 50px; height: auto;" /></td>
+            <td>@user.Name</td>
+            <td>@user.Email</td>
+            <td>@user.Phone</td>
+            <td>@user.Birthdate.ToShortDateString()</td>
+            <td>@user.Gender</td>
+            <td>@user.Role</td>
+            <td>
+                <div class="d-flex justify-content-between gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailUser(user.Id)">Detail</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => DeleteUser(user.Id)">Delete</button>
+                    <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeUserRole(user.Email)">Change Role</button>            
+                </div>
+                
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] 
+    public List<UserDto> Users { get; set; } = [];
+    
+    [Parameter] 
+    public EventCallback<Guid> OnDeleteUser { get; set; }
+    [Parameter] 
+    public EventCallback<Guid> OnDetailUser { get; set; }
+    [Parameter] 
+    public EventCallback<string> OnChangeUserRole { get; set; }
+
+    private async Task DeleteUser(Guid id)
+    {
+        await OnDeleteUser.InvokeAsync(id);
+    }
+
+    private async Task DetailUser(Guid id)
+    {
+        await OnDetailUser.InvokeAsync(id);
+    }
+
+    private async Task ChangeUserRole(string email)
+    {
+        await OnChangeUserRole.InvokeAsync(email);
+    }
+}
