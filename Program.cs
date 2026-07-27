@@ -1,6 +1,6 @@
 using BlazorCarRepairsApp.Components;
 using BlazorCarRepairsApp.Components.Account;
-using BlazorCarRepairsApp.Contracts.Users;
+using BlazorCarRepairsApp.Contracts;
 using BlazorCarRepairsApp.Data;
 using BlazorCarRepairsApp.Middleware;
 using BlazorCarRepairsApp.Models;

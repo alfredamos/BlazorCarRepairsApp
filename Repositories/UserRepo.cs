@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using BlazorCarRepairsApp.Contracts.Users;
+using BlazorCarRepairsApp.Contracts;
 using BlazorCarRepairsApp.Data;
 using BlazorCarRepairsApp.Dto;
 using BlazorCarRepairsApp.Exceptions;

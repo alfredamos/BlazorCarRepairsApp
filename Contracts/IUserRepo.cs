@@ -1,6 +1,6 @@
 ﻿using BlazorCarRepairsApp.Dto;
 
-namespace BlazorCarRepairsApp.Contracts.Users;
+namespace BlazorCarRepairsApp.Contracts;
 
 public interface IUserRepo
 {   
