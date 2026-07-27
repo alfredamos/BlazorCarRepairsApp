@@ -50,9 +50,9 @@ else
         _users = await UserRepo.GetAllUsers();
     }
     
-    private async Task DetailUser(Guid id)
+    private void DetailUser(Guid id)
     {
-        Console.WriteLine($"Getting user with id {id}");
+        NavigationManager.NavigateTo($"/users/{id}");
     }
 
     private async Task DeleteUser(Guid id)

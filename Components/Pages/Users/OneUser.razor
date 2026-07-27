@@ -1,0 +1,47 @@
+﻿<tr @key="User.Id"> 
+    <td>
+        <img src="@User.Image" alt="@User.Name" class="img-fluid rounded-circle" style="max-width: 40px; height: auto;" />
+    </td> 
+    <td>@User.Name</td> 
+    <td>@User.Email</td> 
+    <td>@User.Phone</td> 
+    <td>@User.Birthdate.ToShortDateString()</td> 
+    <td>@User.Gender</td> 
+    <td>@User.Role</td> 
+    <td> 
+        <div class="d-flex justify-content-center gap-2"> 
+            <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailUser(User.Id)">Detail</button> 
+            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(User.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
+            <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeUserRole(User.Email)">Role?</button> 
+        </div> 
+    </td> 
+</tr> 
+
+
+@code {
+
+    [Parameter] 
+    public UserDto User { get; set; } = null!;
+    [Parameter]
+    public EventCallback<string> OnChangeUserRole {get; set; }
+    [Parameter]
+    public EventCallback<Guid> OnDetailUser {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnDeleteUser {get; set; }
+
+    private async Task ChangeUserRole(string email)
+    {
+        await OnChangeUserRole.InvokeAsync(email);
+    }
+
+    private async Task PrepareDelete(Guid userId)
+    {
+        await OnDeleteUser.InvokeAsync(userId);
+    }
+
+    private async Task DetailUser(Guid userId)
+    {
+        await OnDetailUser.InvokeAsync(userId);
+    }
+}

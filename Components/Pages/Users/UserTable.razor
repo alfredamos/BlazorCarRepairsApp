@@ -1,11 +1,17 @@
-﻿@using BlazorCarRepairsApp.Components.Pages.Utils
-@if (Users == null)
+﻿@if (Users == null)
 {
     <p><em>Loading users...</em></p>
 }
 else
 {
     <!-- Responsive wrapper container -->
+    <div class="card-header mt-2 mb-3">
+        <h3 class="text-lg-center">List of Users</h3>
+        <div class="d-flex align-content-center gap-2">
+            <input @bind-value="_searchText" class="focus-ring-primary w-100"/>
+            <button class=" btn btn-outline-primary bi-search"></button>
+        </div>
+    </div>
     <div class="table-responsive">
         <table class="table table-striped align-middle"> 
             <thead> 
@@ -23,24 +29,13 @@ else
             <tbody> 
                 @foreach (var user in Users) 
                 { 
-                    <tr> 
-                        <td>
-                            <img src="@user.Image" alt="@user.Name" class="img-fluid rounded-circle" style="max-width: 40px; height: auto;" />
-                        </td> 
-                        <td>@user.Name</td> 
-                        <td>@user.Email</td> 
-                        <td>@user.Phone</td> 
-                        <td>@user.Birthdate.ToShortDateString()</td> 
-                        <td>@user.Gender</td> 
-                        <td>@user.Role</td> 
-                        <td> 
-                            <div class="d-flex justify-content-center gap-2"> 
-                                <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailUser(user.Id)">Detail</button> 
-                                <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(user.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
-                                <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeUserRole(user.Email)">Change Role</button> 
-                            </div> 
-                        </td> 
-                    </tr> 
+                    <OneUser
+                        User="user"
+                        OnChangeUserRole="ChangeUserRole"
+                        OnDeleteUser="PrepareDelete"
+                        OnDetailUser="DetailUser"
+                    >
+                    </OneUser>
                 } 
             </tbody> 
         </table> 
@@ -56,7 +51,7 @@ else
            OnDeleteClick="ConfirmDelete">
     </Modal>
 }
-
+@_searchText
 
 @code {
     [Parameter] 
@@ -72,6 +67,7 @@ else
     
     private bool _isModalOpen;
     private Guid _userIdToDelete;
+    private string? _searchText;
 
     private async Task DetailUser(Guid id)
     {

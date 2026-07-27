@@ -99,14 +99,13 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
     private async Task<ApplicationUser> GetOneUser(Guid id)
     {
         //----> Fetch the user with the given id.
-        //var user = await userManager.Users.AsNoTracking().FirstOrDefaultAsync(ust => ust.Id == id);
         var user = await userManager.FindByIdAsync(id.ToString());
      
         //----> Return the user.
         return user ?? throw new CustomException("User not found", HttpStatusCode.NotFound);
     }
-    
-    public async Task<List<UserDto>> MapUsersToUserDtos(List<ApplicationUser> users)
+
+    private async Task<List<UserDto>> MapUsersToUserDtos(List<ApplicationUser> users)
     {
         var allUsers = new List<UserDto>();
 
