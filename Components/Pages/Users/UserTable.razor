@@ -6,9 +6,9 @@ else
 {
     <!-- Responsive wrapper container -->
     <div class="card-header mt-2 mb-3">
-        <h3 class="text-lg-center">List of Users</h3>
+        <h3 class="text-lg-center mb-2">List of Users</h3>
         <div class="d-flex align-content-center gap-2">
-            <input @bind-value="_searchText" class="focus-ring-primary w-100"/>
+            <input @bind-value="_searchText" class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search"/>
             <button class=" btn btn-outline-primary bi-search"></button>
         </div>
     </div>
@@ -54,17 +54,13 @@ else
 @_searchText
 
 @code {
-    [Parameter] 
-    public List<UserDto> Users { get; set; } = [];
-    
-    [Parameter] 
-    public EventCallback<Guid> OnDetailUser { get; set; }
-    [Parameter] 
-    public EventCallback<string> OnChangeUserRole { get; set; }
-    
-    [Parameter]
-    public EventCallback<Guid> OnConfirmDelete { get; set; }
-    
+    [Parameter] public List<UserDto> Users { get; set; } = [];
+
+    [Parameter] public EventCallback<Guid> OnDetailUser { get; set; }
+    [Parameter] public EventCallback<string> OnChangeUserRole { get; set; }
+
+    [Parameter] public EventCallback<Guid> OnConfirmDelete { get; set; }
+
     private bool _isModalOpen;
     private Guid _userIdToDelete;
     private string? _searchText;
@@ -94,7 +90,8 @@ else
     private async Task ConfirmDelete()
     {
         await OnConfirmDelete.InvokeAsync(_userIdToDelete);
-        
+
         CloseModal(); // Reset state and close
     }
+    
 }
