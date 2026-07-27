@@ -58,3 +58,27 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.link-hover-danger:hover {
+    background-color: var(--bs-danger) !important;
+    color: var(--bs-white) !important;
+    text-decoration: none !important;
+}
+
+.link-hover-primary:hover {
+    background-color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
+    text-decoration: none !important;
+}
+
+.link-hover-secondary:hover {
+    background-color: var(--bs-secondary) !important;
+    color: var(--bs-white) !important;
+    text-decoration: none !important;
+}
+
+.link-hover-success:hover {
+    background-color: var(--bs-success) !important;
+    color: var(--bs-white) !important;
+    text-decoration: none !important;
+}

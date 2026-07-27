@@ -41,8 +41,6 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
             : throw new CustomException("Failed to change user role", HttpStatusCode.InternalServerError);
     }
 
-    
-
     public async Task<UserDto> DeleteUserById(Guid id)
     {
         //----> Check for existence of user.
@@ -60,14 +58,11 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
 
     public async Task<List<UserDto>> GetAllUsers(string? searchItem = "")
     {
-        Console.WriteLine($"At point 1, in user-repository, searchItem :  {searchItem}");
         var query = userManager.Users;
 
         if (!string.IsNullOrWhiteSpace(searchItem))
         {
-            Console.WriteLine($"At point 2, in user-repository, searchItem :  {searchItem}");
             var search = searchItem.Trim().ToLower();
-            Console.WriteLine($"At point 3, in user-repository, searchItem :  {searchItem}");
 
             query = query.Where(user => 
                 (!string.IsNullOrEmpty(user.Name) && user.Name.ToLower().Contains(search)) ||
@@ -77,10 +72,10 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
             );
         }
 
+        //----> Send back response.
         var users = await query.ToListAsync();
         return await MapUsersToUserDtos(users);
     }
-
 
     public async Task<UserDto> GetUserById(Guid id)
     {
@@ -122,20 +117,21 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
 
     private async Task<List<UserDto>> MapUsersToUserDtos(List<ApplicationUser> users)
     {
+        //----> Initialize users.
         var allUsers = new List<UserDto>();
 
-        // Process each user sequentially/asynchronously to avoid thread deadlocks.
+        //----> Process each user sequentially/asynchronously to avoid thread deadlocks.
         foreach (var user in users)
         {
             var roles = await userManager.GetRolesAsync(user);
             var primaryRole = roles.FirstOrDefault() ?? Roles.User;
         
-            // Maps the system user and their role string to the DTO
+            //----> Maps the system user and their role string to the DTO
             var userDto = UserMapper.MapUserToUserDto(user, primaryRole);
             allUsers.Add(userDto);
         }
 
-        // Send back response.
+        //----> Send back response.
         return allUsers;
     }
 }
