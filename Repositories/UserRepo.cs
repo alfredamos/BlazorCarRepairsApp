@@ -58,14 +58,29 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
             : throw new CustomException("User not deleted", HttpStatusCode.InternalServerError);
     }
 
-    public async Task<List<UserDto>> GetAllUsers()
+    public async Task<List<UserDto>> GetAllUsers(string? searchItem = "")
     {
-        //----> Fetch all users from the database.
-        var users = await userManager.Users.ToListAsync();
-        
-        //----> Map users to usersDto.
+        Console.WriteLine($"At point 1, in user-repository, searchItem :  {searchItem}");
+        var query = userManager.Users;
+
+        if (!string.IsNullOrWhiteSpace(searchItem))
+        {
+            Console.WriteLine($"At point 2, in user-repository, searchItem :  {searchItem}");
+            var search = searchItem.Trim().ToLower();
+            Console.WriteLine($"At point 3, in user-repository, searchItem :  {searchItem}");
+
+            query = query.Where(user => 
+                (!string.IsNullOrEmpty(user.Name) && user.Name.ToLower().Contains(search)) ||
+                (!string.IsNullOrEmpty(user.Email) && user.Email.ToLower().Contains(search)) ||
+                (!string.IsNullOrEmpty(user.PhoneNumber) && user.PhoneNumber.Contains(search)) ||
+                (!string.IsNullOrEmpty(user.Gender) && user.Gender.ToLower().Contains(search))
+            );
+        }
+
+        var users = await query.ToListAsync();
         return await MapUsersToUserDtos(users);
     }
+
 
     public async Task<UserDto> GetUserById(Guid id)
     {

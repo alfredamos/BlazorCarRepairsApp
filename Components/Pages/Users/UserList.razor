@@ -22,17 +22,20 @@ else
         OnChangeUserRole="ChangeUserRole"
         OnConfirmDelete="DeleteUser"
         OnDetailUser="DetailUser"
-        
+        OnGetSearchItem="GetSearchItem"
     />
 }
 
 @code {
     private List<UserDto>? _users;
+    private string? _searchText;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            
+            Console.WriteLine($"The value of searchItem : {_searchText}");
             _users = await UserRepo.GetAllUsers() ?? new List<UserDto>();
         }
         catch (Exception ex)
@@ -58,6 +61,15 @@ else
     private async Task DeleteUser(Guid id)
     {
         await UserRepo.DeleteUserById(id);
-        _users = await UserRepo.GetAllUsers();
+        _users = await UserRepo.GetAllUsers(_searchText);
     }
+
+    private async Task GetSearchItem(string query)
+    {
+        Console.WriteLine($"The search query : {query}");
+        _searchText = query;
+        
+        _users = await UserRepo.GetAllUsers(query);
+    }
+    
 }
