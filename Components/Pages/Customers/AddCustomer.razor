@@ -1,6 +1,75 @@
-﻿@page "/AddCustomer"
-<h3>AddCustomer</h3>
+﻿@page "/customers/add"
+
+@inject ICustomerRepo CustomerRepo
+@inject IUserRepo UserRepo
+@inject NavigationManager NavigationManager
+
+<PageTitle>Customer Create Form</PageTitle>
+
+@if (_users is null)
+{
+    <p>Loading customer create form</p>
+}
+else
+{
+    <div class="row">
+    <div class="col-lg-6 mx-auto">
+        <EditForm Model="Customer" method="post" OnValidSubmit="CreateNewCustomerForm" FormName="customerCreateForm">
+            <DataAnnotationsValidator />
+            <h2>Create customer form.</h2>
+            <hr />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Customer.Address" id="Customer.Address" class="form-control" autocomplete="address" aria-required="true" placeholder="12 Layi Ajayi-Bembe Street, Victoria Island, Lagos" />
+                <label for="Customer.Address">Address</label>
+                <ValidationMessage For="() => Customer.Address" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputTextArea @bind-Value="Customer.Notes" id="Customer.Notes" class="form-control" autocomplete="notes" aria-required="true" placeholder="You are a good customer!" />
+                <label for="Customer.Notes">Notes</label>
+                <ValidationMessage For="() => Customer.Notes" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Customer.UserId" id="Customer.UserId" class="form-select" autocomplete="userId" aria-required="true" placeholder="userId">
+                    <option >Please select user!</option>
+                    @foreach (var user in _users)
+                    {
+                        <option value="@user.Id">@user.Name</option>
+                    }
+                    
+                </InputSelect>
+                <label for="Customer.UserId">User</label>
+                <ValidationMessage For="() => Customer.UserId" class="text-danger" />
+            </div>
+            <div class="d-flex flex-column align-content-center gap-2">
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Add</button>
+                <button type="button" class="w-100 btn btn-lg btn-secondary">Cancel</button>
+            </div>
+            
+        </EditForm>
+    </div>
+</div>
+}
+
+
 
 @code {
-    
+    [SupplyParameterFromForm] public CustomerCreateDto Customer { get; set; } = null!;
+
+    private List<UserDto>? _users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _users ??= await UserRepo.GetAllUsers("Customer");
+        Customer ??= new();
+        
+    }
+
+    private async Task CreateNewCustomerForm()
+    {
+        await CustomerRepo.CreateCustomer(customer: Customer);
+        NavigationManager.NavigateTo("customers");
+        
+    }
 }
+

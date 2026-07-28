@@ -12,7 +12,11 @@
 }
 else if (!_customers.Any())
 {
-    <p>No customers found.</p>
+    <div class="d-flex justify-content-between align-content-center mx-auto">
+        <p>No customers found.</p>
+        <button type="button" class="btn btn-outline-secondary btn-lg" @onclick="CreateNewCustomer">Add New Customer</button>
+    </div>
+    
 }
 else
 {
@@ -20,21 +24,21 @@ else
         Customers="_customers" 
         OnChangeCustomerStatus="ChangeCustomerStatus"
         OnConfirmDelete="DeleteCustomer"
+        OnCreateNewCustomer="CreateNewCustomer"
         OnDetailCustomer="DetailCustomer"
+        OnEditCustomer="UpdateCustomer"
         OnGetSearchItem="GetSearchItem"
     />
 }
 
 @code {
     private List<CustomerResponse>? _customers;
-    private string? _searchText;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             
-            Console.WriteLine($"The value of searchItem : {_searchText}");
             _customers ??= await CustomerRepo.GetCustomers();
         }
         catch (Exception ex)
@@ -47,7 +51,7 @@ else
 
     private async Task ChangeCustomerStatus(Guid id)
     {
-        Console.WriteLine($"Change the status of customer with {id}");
+        Console.WriteLine($"At point 3 of status change, id : {id}");
         await CustomerRepo.ChangeCustomerStatus(id);
         _customers = await CustomerRepo.GetCustomers();
     }
@@ -60,15 +64,25 @@ else
     private async Task DeleteCustomer(Guid id)
     {
         await CustomerRepo.DeleteCustomerById(id);
-        _customers = await CustomerRepo.GetCustomers(_searchText);
+        _customers = await CustomerRepo.GetCustomers();
     }
 
     private async Task GetSearchItem(string query)
     {
         Console.WriteLine($"The search query : {query}");
-        _searchText = query;
         
         _customers = await CustomerRepo.GetCustomers(query);
     }
-    
+
+    private void CreateNewCustomer()
+    {
+        NavigationManager.NavigateTo("customers/add");
+    }
+
+    private void UpdateCustomer(Guid id)
+    {
+        NavigationManager.NavigateTo($"customers/edit/{id}");
+    }
+
+
 }

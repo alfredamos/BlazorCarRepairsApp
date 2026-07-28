@@ -12,7 +12,7 @@ public class Customer
     [MaxLength(100)]
     public string? Address { get; set; } = string.Empty;
 
-    public bool? Active { get; set; } = true;
+    public bool Active { get; set; } = true;
 
     [MaxLength(1000)]
     public string? Notes { get; set; } = string.Empty;

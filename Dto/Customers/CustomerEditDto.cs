@@ -9,11 +9,11 @@ public class CustomerEditDto
     
     [Required]
     [MaxLength(200)]
-    public string Address { get; set; } = string.Empty;
+    public string? Address { get; set; } = string.Empty;
     
     [Required]
     [MaxLength(1000)]
-    public string Notes { get; set; } = string.Empty;
+    public string? Notes { get; set; } = string.Empty;
     
     public bool Active { get; set; } = true;
     
@@ -21,5 +21,5 @@ public class CustomerEditDto
     
     public DateTime UpdatedAt { get; set; }
     
-    public Guid UserId { get; set; } 
+    public Guid? UserId { get; set; } 
 }

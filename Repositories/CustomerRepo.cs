@@ -15,16 +15,15 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
 {
     public async Task<ResponseMessage> ChangeCustomerStatus(Guid id)
     {
-        //----> Fetch the customer with the giving id.
+        //----> Get customer from db.
         var customer = await GetOneCustomer(id);
         
         //----> Change customer status.
-        var active = !customer.Active;
-        customer.Active = active;
+        customer.Active = !customer.Active;
+        customer.UpdatedAt = DateTime.UtcNow;
         
-        //----> Update customer status in db.
-        context.Customers.Update(customer);
-        await context.SaveChangesAsync();
+        //----> Update customer.
+        context.Update(customer);
         
         //----> Send back response.
         return new ResponseMessage
@@ -81,13 +80,8 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
         var existingCustomer = await GetOneCustomer(id);
         
         //----> Map customer-edit-dto to customer.
-        existingCustomer.Id = customerEditDto.Id;
-        existingCustomer.Address = customerEditDto.Address;
-        existingCustomer.Active = customerEditDto.Active;
-        existingCustomer.Notes =  customerEditDto.Notes;
-        existingCustomer.UserId = customerEditDto.UserId;
-        existingCustomer.UpdatedAt = customerEditDto.UpdatedAt;
-        
+        existingCustomer =
+            CustomerMapper.MapCustomerEditDtoToCustomer(customerEditDto, existingCustomer, existingCustomer.CreatedAt);
         //----> Update the customer info in db.
         context.Customers.Update(existingCustomer);
         await context.SaveChangesAsync();
@@ -117,27 +111,27 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
         if (!string.IsNullOrWhiteSpace(searchItem))
         {
             var search = searchItem.Trim().ToLower();
-
-            query = query.Where(cst =>
-                 cst.User != null &&
-                 ((!string.IsNullOrEmpty(cst.User.Name) && cst.User.Name.ToLower().Contains(search)) ||
-                  (!string.IsNullOrEmpty(cst.User.Email) && cst.User.Email.ToLower().Contains(search)) ||
-                  (!string.IsNullOrEmpty(cst.User.PhoneNumber) && cst.User.PhoneNumber.Contains(search)) ||
-                  (!string.IsNullOrEmpty(cst.User.Gender) && cst.User.Gender.ToLower().Contains(search)))
+        
+            query = query.Where(cst => 
+                (cst.Address != null && cst.Address.ToLower().Contains(search)) ||
+                (cst.User != null && (
+                    (!string.IsNullOrEmpty(cst.User.Name) && cst.User.Name.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(cst.User.Email) && cst.User.Email.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(cst.User.PhoneNumber) && cst.User.PhoneNumber.Contains(search)) ||
+                    (!string.IsNullOrEmpty(cst.User.Gender) && cst.User.Gender.ToLower().Contains(search))
+                ))
             );
-
-            query = query.Where(cst => cst.Address != null && cst.Address.ToLower().Contains(search));
         }
+
         var customers = await query.ToListAsync();
 
-        //----> Send back response.
         return [.. customers.Select(CustomerMapper.MapCustomerToCustomerResponse)];
     }
 
     public async Task<List<CustomerResponse>> GetActiveCustomers(string? searchItem = "")
     {
         //----> Fetch all active customers.
-        var customers = (await GetCustomers(searchItem)).Where(cst => cst.Active.HasValue).ToList();
+        var customers = (await GetCustomers(searchItem)).Where(cst => cst.Active).ToList();
         
         //----> Send back response.
         return customers;
@@ -157,7 +151,7 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
     public async Task<List<CustomerResponse>> GetInactiveCustomers(string? searchItem = "")
     {
         //----> Fetch all active customers.
-        var customers = (await GetCustomers(searchItem)).Where(cst => cst.Active.HasValue).ToList();
+        var customers = (await GetCustomers(searchItem)).Where(cst => !cst.Active).ToList();
         
         //----> Send back response.
         return customers;

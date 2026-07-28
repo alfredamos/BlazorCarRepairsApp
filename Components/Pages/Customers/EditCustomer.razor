@@ -1,0 +1,77 @@
+﻿@page "/customers/edit/{id:guid}"
+
+@inject ICustomerRepo CustomerRepo
+@inject NavigationManager NavigationManager
+
+<PageTitle>Customer Edit Form</PageTitle>
+
+@if (_customerResponse is null && Customer is null)
+{
+    <p>Loading customer edit form</p>
+}
+else
+{
+    <div class="row">
+    <div class="col-lg-6 mx-auto">
+        <EditForm Model="Customer" method="post" OnValidSubmit="EditCustomerForm" FormName="customerCreateForm">
+            <DataAnnotationsValidator />
+            <h2>Edit customer form.</h2>
+            <hr />
+            <ValidationSummary class="text-danger" role="alert" />
+            <input @bind-value="Customer!.Id" hidden="hidden"/>
+            <input @bind-value="Customer.UserId" hidden="hidden"/>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Customer.Address" id="Customer.Address" class="form-control" autocomplete="address" aria-required="true" placeholder="12 Layi Ajayi-Bembe Street, Victoria Island, Lagos" />
+                <label for="Customer.Address">Address</label>
+                <ValidationMessage For="() => Customer.Address" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputTextArea @bind-Value="Customer.Notes" id="Customer.Notes" class="form-control" autocomplete="notes" aria-required="true" placeholder="You are a good customer!" />
+                <label for="Customer.Notes">Notes</label>
+                <ValidationMessage For="() => Customer.Notes" class="text-danger" />
+            </div>
+            <div class="d-flex flex-column align-content-center gap-2">
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Edit</button>
+                <button type="button" class="w-100 btn btn-lg btn-secondary">Cancel</button>
+            </div>
+            
+        </EditForm>
+    </div>
+</div>
+}
+
+
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    [SupplyParameterFromForm] public CustomerEditDto? Customer { get; set; }
+
+    private CustomerResponse? _customerResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _customerResponse ??=  await CustomerRepo.GetCustomerById(Id);
+        Customer ??= new CustomerEditDto
+        {
+            Id = _customerResponse.Id,
+            Address = _customerResponse?.Address,
+            Active = _customerResponse!.Active,
+            Notes = _customerResponse?.Notes,
+            UserId = _customerResponse?.UserId
+        };
+        
+    }
+
+    private async Task EditCustomerForm()
+    {
+        Console.WriteLine($"Editing customer..., Id : {Customer!.Id}");
+        Console.WriteLine($"Editing customer..., Address : {Customer!.Address}");
+        Console.WriteLine($"Editing customer..., Active : {Customer!.Active}");
+        Console.WriteLine($"Editing customer..., Notes : {Customer!.Notes}");
+        Console.WriteLine($"Editing customer..., UserId : {Customer!.UserId}");
+        await CustomerRepo.EditCustomerById(Id, Customer!);
+        NavigationManager.NavigateTo("customers");
+        
+    }
+}
+

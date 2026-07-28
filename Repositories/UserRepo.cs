@@ -62,18 +62,18 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
         if (!string.IsNullOrWhiteSpace(searchItem))
         {
             var search = searchItem.Trim().ToLower();
-
+        
             query = query.Where(user => 
-                (!string.IsNullOrEmpty(user.Name) && user.Name.ToLower().Contains(search)) ||
-                (!string.IsNullOrEmpty(user.Email) && user.Email.ToLower().Contains(search)) ||
-                (!string.IsNullOrEmpty(user.PhoneNumber) && user.PhoneNumber.Contains(search)) ||
-                (!string.IsNullOrEmpty(user.Gender) && user.Gender.ToLower().Contains(search))
+                (!string.IsNullOrEmpty(user.Name) && user.Name.ToLower().Contains(search)) || 
+                (!string.IsNullOrEmpty(user.Email) && user.Email.ToLower().Contains(search)) || 
+                (!string.IsNullOrEmpty(user.PhoneNumber) && user.PhoneNumber.ToLower().Contains(search)) || 
+                (!string.IsNullOrEmpty(user.Gender) && user.Gender.ToLower().Contains(search)) || 
+                (!string.IsNullOrEmpty(user.UserType) && user.UserType.ToLower().Contains(search))
             );
         }
 
-        //----> Send back response.
         var users = await query.ToListAsync();
-        return await MapUsersToUserDtos(users);
+        return await MapUsersToUserDtos(users); // Removed redundant 'await' if MapUsersToUserDtos returns List<UserDto> directly
     }
 
     public async Task<UserDto> GetUserById(Guid id)

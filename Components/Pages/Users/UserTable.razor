@@ -1,46 +1,40 @@
-﻿@if (Users == null)
-{
-    <p><em>Loading users...</em></p>
-}
-else
-{
-    <!-- Responsive wrapper container -->
-    <div class="card-header mt-2 mb-3">
-        <h3 class="text-lg-center mb-2">List of Users</h3>
-        <div class="d-flex align-content-center gap-2">
-            <input @bind-value="SearchItem" class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search"/>
-            <button class=" btn btn-outline-primary bi-search" @onclick="GetSearchItem"></button>
-        </div>
+﻿
+<!-- Responsive wrapper container -->
+<div class="card-header mt-2 mb-3">
+    <h3 class="text-lg-center mb-2">List of Users</h3>
+    <div class="d-flex align-content-center gap-2">
+        <input @bind-value="SearchItem" class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search"/>
+        <button class=" btn btn-outline-primary bi-search" @onclick="GetSearchItem"></button>
     </div>
-    <div class="table-responsive">
-        <table class="table table-striped align-middle"> 
-            <thead> 
-                <tr> 
-                    <th scope="col">Image</th> 
-                    <th scope="col">Name</th> 
-                    <th scope="col">Email</th> 
-                    <th scope="col">Phone</th> 
-                    <th scope="col">Birthdate</th> 
-                    <th scope="col">Gender</th> 
-                    <th scope="col">Role</th> 
-                    <th scope="col" class="text-center">Action</th> 
-                </tr> 
-            </thead> 
-            <tbody> 
-                @foreach (var user in Users) 
-                { 
-                    <OneUser
-                        User="user"
-                        OnChangeUserRole="ChangeUserRole"
-                        OnDeleteUser="PrepareDelete"
-                        OnDetailUser="DetailUser"
-                    >
-                    </OneUser>
-                } 
-            </tbody> 
-        </table> 
-    </div>
-}
+</div>
+<div class="table-responsive">
+    <table class="table table-striped align-middle"> 
+        <thead> 
+        <tr> 
+            <th scope="col">Image</th> 
+            <th scope="col">Name</th> 
+            <th scope="col">Email</th> 
+            <th scope="col">Phone</th> 
+            <th scope="col">Birthdate</th> 
+            <th scope="col">Gender</th> 
+            <th scope="col">Role</th> 
+            <th scope="col" class="text-center">Action</th> 
+        </tr> 
+        </thead> 
+        <tbody> 
+        @foreach (var user in Users) 
+        { 
+            <OneUser
+                User="user"
+                OnChangeUserRole="ChangeUserRole"
+                OnDeleteUser="PrepareDelete"
+                OnDetailUser="DetailUser"
+            >
+            </OneUser>
+        } 
+        </tbody> 
+    </table> 
+</div>
 
 @if (_isModalOpen)
 {
@@ -69,7 +63,7 @@ else
         set
         {
             field = value;
-            _searchText = string.IsNullOrWhiteSpace(_searchText) ? value : "";
+            _searchText = !string.IsNullOrWhiteSpace(_searchText) ? value : "";
         }
     }
 

@@ -1,20 +1,21 @@
 ﻿<tr @key="Customer.Id"> 
     <td>
-        <img src="@Customer.Image" alt="@Customer.Name" class="img-fluid rounded-circle" style="max-width: 40px; height: auto;" />
+        <img src="@Customer.Image" alt="@Customer.Name" class="img-fluid rounded-1" style="max-width: 40px; height: auto;" />
     </td> 
     <td>@Customer.Name</td> 
     <td>@Customer.Email</td> 
     <td>@Customer.Phone</td> 
     <td>@Customer.Address</td> 
-    <td>@Customer.Birthdate.ToShortDateString()</td> 
+    <td>@Customer.Birthdate</td> 
     <td>@Customer.Gender</td> 
     <td>@Customer.Active</td> 
     <td>@Customer.Notes</td> 
     <td> 
         <div class="d-flex justify-content-center gap-2"> 
             <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailCustomer(Customer.Id)">Detail</button> 
+            <button type="button" class="btn btn-outline-warning btn-sm fw-bold" @onclick="() => UpdateCustomer(Customer.Id)">Edit</button> 
             <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(Customer.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
-            <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeCustomerStatus(Customer.Id)">Role?</button> 
+            <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeCustomerStatus(Customer.Id)">Status?</button> 
         </div> 
     </td> 
 </tr> 
@@ -31,9 +32,13 @@
     
     [Parameter]
     public EventCallback<Guid> OnDeleteCustomer {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnEditCustomer {get; set; }
 
     private async Task ChangeCustomerStatus(Guid id)
     {
+        Console.WriteLine($"At point 1 of status change, id : {id}");
         await OnChangeCustomerStatus.InvokeAsync(id);
     }
 
@@ -45,5 +50,10 @@
     private async Task DetailCustomer(Guid id)
     {
         await OnDetailCustomer.InvokeAsync(id);
+    }
+
+    private async Task UpdateCustomer(Guid id)
+    {
+        await OnEditCustomer.InvokeAsync(id);
     }
 }

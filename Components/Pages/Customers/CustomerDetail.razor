@@ -13,7 +13,7 @@ else
         <div class="col-4 mx-auto">
             <div class="card" style="width: 18rem;">
                 <div class="d-flex justify-content-between align-content-center p-2">
-                    <img src="@Customer.Image" class="w-25 h-25" alt="@Customer.Name">
+                    <img src="@Customer.Image" class="w-25 h-25 rounded-2" alt="@Customer.Name">
                     <span class="fw-bolder">@Customer.Name</span>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -36,7 +36,7 @@ else
                     <li class="list-group-item">
                         <div class="d-flex justify-content-between align-content-lg-center">
                             <span>DOB:</span>
-                            <span> @Customer.Birthdate.ToShortDateString()</span>
+                            <span> @Customer.Birthdate</span>
                         </div></li>
                     <li class="list-group-item">
                         <div class="d-flex justify-content-between align-content-lg-center">

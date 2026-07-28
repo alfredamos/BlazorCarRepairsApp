@@ -13,8 +13,8 @@ public class CustomerResponse
     public string? Image { get; set; } = string.Empty;
     
     public string? Notes { get; set; } = string.Empty;
-    public bool? Active { get; set; } = true;
-    public DateOnly  Birthdate { get; set; }
+    public bool Active { get; set; } = true;
+    public DateOnly?  Birthdate { get; set; }
     
     public DateTime CreatedAt { get; set; }
     

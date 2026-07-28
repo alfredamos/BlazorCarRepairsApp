@@ -1,48 +1,46 @@
-﻿@if (Customers == null)
-{
-    <p><em>Loading customers...</em></p>
-}
-else
-{
-    <!-- Responsive wrapper container -->
-    <div class="card-header mt-2 mb-3">
-        <h3 class="text-lg-center mb-2">List of Customers</h3>
-        <div class="d-flex align-content-center gap-2">
-            <input @bind-value="SearchItem" class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search"/>
-            <button class=" btn btn-outline-primary bi-search" @onclick="GetSearchItem"></button>
-        </div>
+﻿
+<!-- Responsive wrapper container -->
+<div class="card-header mt-2 mb-3">
+    <h3 class="text-lg-center mb-2">List of Customers</h3>
+    <div class="d-flex align-content-center gap-2">
+        <input @bind-value="SearchItem" class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search"/>
+        <button class=" btn btn-outline-primary bi-search" @onclick="GetSearchItem"></button>
     </div>
-    <div class="table-responsive">
-        <table class="table table-striped align-middle"> 
-            <thead> 
-                <tr> 
-                    <th scope="col">Image</th> 
-                    <th scope="col">Name</th> 
-                    <th scope="col">Email</th> 
-                    <th scope="col">Phone</th> 
-                    <th scope="col">Address</th> 
-                    <th scope="col">Birthdate</th> 
-                    <th scope="col">Gender</th> 
-                    <th scope="col">Status</th>
-                    <th scope="col">Notes</th>
-                    <th scope="col" class="text-center">Action</th> 
-                </tr> 
-            </thead> 
-            <tbody> 
-                @foreach (var user in Customers) 
-                { 
-                    <OneCustomer
-                        Customer="user"
-                        OnChangeCustomerStatus="ChangeCustomerStatus"
-                        OnDeleteCustomer="PrepareDelete"
-                        OnDetailCustomer="DetailCustomer"
-                    >
-                    </OneCustomer>
-                } 
-            </tbody> 
-        </table> 
+</div>
+<div class="table-responsive">
+    <table class="table table-striped align-middle"> 
+        <thead> 
+        <tr> 
+            <th scope="col">Image</th> 
+            <th scope="col">Name</th> 
+            <th scope="col">Email</th> 
+            <th scope="col">Phone</th> 
+            <th scope="col">Address</th> 
+            <th scope="col">Birthdate</th> 
+            <th scope="col">Gender</th> 
+            <th scope="col">Status</th>
+            <th scope="col">Notes</th>
+            <th scope="col" class="text-center">Action</th> 
+        </tr> 
+        </thead> 
+        <tbody> 
+        @foreach (var user in Customers) 
+        { 
+            <OneCustomer
+                Customer="user"
+                OnChangeCustomerStatus="ChangeCustomerStatus"
+                OnDeleteCustomer="PrepareDelete"
+                OnDetailCustomer="DetailCustomer"
+                OnEditCustomer="UpdateCustomer"
+            >
+            </OneCustomer>
+        } 
+        </tbody> 
+    </table> 
+    <div class="d-flex justify-content-end align-content-center">
+        <button type="button" class="btn btn-outline-secondary btn-lg" @onclick="CreateNewCustomer">Add new Customer</button>
     </div>
-}
+</div>
 
 @if (_isModalOpen)
 {
@@ -60,9 +58,12 @@ else
     [Parameter] public EventCallback<Guid> OnChangeCustomerStatus { get; set; }
     [Parameter] public EventCallback<Guid> OnConfirmDelete { get; set; }
     [Parameter] public EventCallback<string> OnGetSearchItem { get; set; }
+    [Parameter] public EventCallback OnCreateNewCustomer { get; set; }
+    [Parameter]
+    public EventCallback<Guid> OnEditCustomer {get; set; }
 
     private bool _isModalOpen;
-    private Guid _userIdToDelete;
+    private Guid _customerIdToDelete;
     private string? _searchText;
     
     private string? SearchItem
@@ -71,7 +72,7 @@ else
         set
         {
             field = value;
-            _searchText = string.IsNullOrWhiteSpace(_searchText) ? value : "";
+            _searchText = !string.IsNullOrWhiteSpace(_searchText) ? value : "";
         }
     }
 
@@ -82,24 +83,25 @@ else
 
     private async Task ChangeCustomerStatus(Guid id)
     {
+        Console.WriteLine($"At point 2 of status change, id : {id}");
         await OnChangeCustomerStatus.InvokeAsync(id);
     }
 
-    private void PrepareDelete(Guid userId)
+    private void PrepareDelete(Guid id)
     {
-        _userIdToDelete = userId;
+        _customerIdToDelete = id;
         _isModalOpen = true; // Open the modal
     }
 
     private void CloseModal()
     {
         _isModalOpen = false; // Close the modal
-        _userIdToDelete = Guid.Empty;
+        _customerIdToDelete = Guid.Empty;
     }
 
     private async Task ConfirmDelete()
     {
-        await OnConfirmDelete.InvokeAsync(_userIdToDelete);
+        await OnConfirmDelete.InvokeAsync(_customerIdToDelete);
 
         CloseModal(); // Reset state and close
     }
@@ -107,6 +109,16 @@ else
     private async Task GetSearchItem()
     {
         await OnGetSearchItem.InvokeAsync(SearchItem);
+    }
+
+    private async Task CreateNewCustomer()
+    {
+        await OnCreateNewCustomer.InvokeAsync();
+    }
+
+    private async Task UpdateCustomer(Guid id)
+    {
+        await OnEditCustomer.InvokeAsync(id);
     }
     
 }

@@ -18,18 +18,18 @@ public static class CustomerMapper
         };
     }
     
-    public static Customer MapCustomerEditDtoToCustomer(CustomerEditDto dto)
+    public static Customer MapCustomerEditDtoToCustomer(CustomerEditDto dto, Customer customer, DateTime createdAt)
     {
-        return new Customer
-        {
-            Id = dto.Id,
-            Address = dto.Address,
-            Active = dto.Active,
-            Notes = dto.Notes,
-            UserId = dto.UserId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        customer.Id = dto.Id;
+        customer.Address = dto.Address;
+        customer.Active = dto.Active;
+        customer.Notes = dto.Notes;
+        customer.UserId = (Guid)dto.UserId!;
+        customer.CreatedAt = createdAt;
+        customer.UpdatedAt = DateTime.UtcNow;
+
+        return customer;
+
     }
     
     public static CustomerResponse MapCustomerToCustomerResponse(Customer cst)
@@ -37,15 +37,16 @@ public static class CustomerMapper
         return new CustomerResponse
         {
             Id = cst.Id,
-            Name = cst?.User?.Name,
-            Email = cst?.User?.Email,
-            Phone = cst?.User?.PhoneNumber,
-            Image = cst?.User?.ImagePath,
-            Gender = cst?.User?.Gender,
-            Address = cst?.Address,
-            Active = cst?.Active,
-            Notes = cst?.Notes,
-            UserId = (Guid)cst?.UserId!,
+            Birthdate = cst.User?.Birthdate,
+            Name = cst.User?.Name,
+            Email = cst.User?.Email,
+            Phone = cst.User?.PhoneNumber,
+            Image = cst.User?.ImagePath,
+            Gender = cst.User?.Gender,
+            Address = cst.Address,
+            Active = cst.Active,
+            Notes = cst.Notes,
+            UserId = cst.UserId!,
             CreatedAt = cst.CreatedAt,
             UpdatedAt = cst.UpdatedAt,
             
