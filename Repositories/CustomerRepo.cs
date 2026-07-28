@@ -7,14 +7,32 @@ using BlazorCarRepairsApp.Exceptions;
 using BlazorCarRepairsApp.Mappers;
 using BlazorCarRepairsApp.Models;
 using Microsoft.EntityFrameworkCore;
+using CustomerResponse = BlazorCarRepairsApp.Dto.Customers.CustomerResponse;
 
 namespace BlazorCarRepairsApp.Repositories;
 
 public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
 {
-    public Task<ResponseMessage> ChangeCustomerStatus(Guid id)
+    public async Task<ResponseMessage> ChangeCustomerStatus(Guid id)
     {
-        throw new NotImplementedException();
+        //----> Fetch the customer with the giving id.
+        var customer = await GetOneCustomer(id);
+        
+        //----> Change customer status.
+        var active = !customer.Active;
+        customer.Active = active;
+        
+        //----> Update customer status in db.
+        context.Customers.Update(customer);
+        await context.SaveChangesAsync();
+        
+        //----> Send back response.
+        return new ResponseMessage
+        {
+            Message = "Customer status changed successfully!",
+            Status = "Success",
+            StatusCode = HttpStatusCode.OK
+        };
     }
 
     public async Task<ResponseMessage> CreateCustomer(CustomerCreateDto customerDto)
@@ -92,23 +110,37 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
         return CustomerMapper.MapCustomerToCustomerResponse(customer);
     }
 
-    public async Task<List<CustomerResponse>> GetCustomers()
+    public async Task<List<CustomerResponse>> GetCustomers(string? searchItem = "")
     {
-        //----> Fetch all customers.
-        var customers = await context.Customers.Include(cst => cst.User).AsNoTracking().ToListAsync();
-        
+        var query = context.Customers.Include(cst => cst.User).AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(searchItem))
+        {
+            var search = searchItem.Trim().ToLower();
+
+            query = query.Where(cst =>
+                 cst.User != null &&
+                 ((!string.IsNullOrEmpty(cst.User.Name) && cst.User.Name.ToLower().Contains(search)) ||
+                  (!string.IsNullOrEmpty(cst.User.Email) && cst.User.Email.ToLower().Contains(search)) ||
+                  (!string.IsNullOrEmpty(cst.User.PhoneNumber) && cst.User.PhoneNumber.Contains(search)) ||
+                  (!string.IsNullOrEmpty(cst.User.Gender) && cst.User.Gender.ToLower().Contains(search)))
+            );
+
+            query = query.Where(cst => cst.Address != null && cst.Address.ToLower().Contains(search));
+        }
+        var customers = await query.ToListAsync();
+
         //----> Send back response.
         return [.. customers.Select(CustomerMapper.MapCustomerToCustomerResponse)];
     }
 
-    public async Task<List<CustomerResponse>> GetActiveCustomers()
+    public async Task<List<CustomerResponse>> GetActiveCustomers(string? searchItem = "")
     {
-        //----> Fetch all customers.
-        var query = context.Customers.AsNoTracking();
-        var customers = await query.Where(cst => cst.Active.HasValue).ToListAsync();
+        //----> Fetch all active customers.
+        var customers = (await GetCustomers(searchItem)).Where(cst => cst.Active.HasValue).ToList();
         
         //----> Send back response.
-        return [.. customers.Select(CustomerMapper.MapCustomerToCustomerResponse)];
+        return customers;
     }
 
     public async Task<CustomerResponse> GetCustomerByUserId(Guid userId)
@@ -116,25 +148,19 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
         //----> Fetch the customer with the given id.
         var query = context.Customers.AsNoTracking();
         var customer = await query.Where(cst => cst.UserId.Equals(userId)).FirstOrDefaultAsync();
-        
-        //----> Check for null customer.
-        if (customer is null)
-        {
-            throw new CustomException("Customer not found", HttpStatusCode.NotFound);
-        }
-        
-        //----> Send back response.
-        return CustomerMapper.MapCustomerToCustomerResponse(customer);
+
+        //----> Check for null customer and send back response.
+        return customer is null ? throw new CustomException("Customer not found", HttpStatusCode.NotFound) :
+            CustomerMapper.MapCustomerToCustomerResponse(customer);
     }
 
-    public async Task<List<CustomerResponse>> GetInactiveCustomers()
+    public async Task<List<CustomerResponse>> GetInactiveCustomers(string? searchItem = "")
     {
-        //----> Fetch all customers.
-        var query = context.Customers.AsNoTracking();
-        var customers = await query.Where(cst => !cst.Active.HasValue).ToListAsync();
+        //----> Fetch all active customers.
+        var customers = (await GetCustomers(searchItem)).Where(cst => cst.Active.HasValue).ToList();
         
         //----> Send back response.
-        return [.. customers.Select(CustomerMapper.MapCustomerToCustomerResponse)];
+        return customers;
     }
 
     private async Task<Customer> GetOneCustomer(Guid id)

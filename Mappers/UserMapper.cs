@@ -12,12 +12,10 @@ public static class UserMapper
             Id = user.Id,
             Name = user.Name,
             Email = user.Email,
+            Phone = user.PhoneNumber,
             Image = user.ImagePath,
             Gender = user.Gender,
-            Phone = user.PhoneNumber,
-            Birthdate = user.Birthdate,
-            Role = role,
+            Role = role
         };
     }
-    
 }

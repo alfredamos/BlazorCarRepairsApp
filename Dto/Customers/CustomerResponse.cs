@@ -14,6 +14,7 @@ public class CustomerResponse
     
     public string? Notes { get; set; } = string.Empty;
     public bool? Active { get; set; } = true;
+    public DateOnly  Birthdate { get; set; }
     
     public DateTime CreatedAt { get; set; }
     

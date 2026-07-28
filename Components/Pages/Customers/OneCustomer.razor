@@ -1,0 +1,49 @@
+﻿<tr @key="Customer.Id"> 
+    <td>
+        <img src="@Customer.Image" alt="@Customer.Name" class="img-fluid rounded-circle" style="max-width: 40px; height: auto;" />
+    </td> 
+    <td>@Customer.Name</td> 
+    <td>@Customer.Email</td> 
+    <td>@Customer.Phone</td> 
+    <td>@Customer.Address</td> 
+    <td>@Customer.Birthdate.ToShortDateString()</td> 
+    <td>@Customer.Gender</td> 
+    <td>@Customer.Active</td> 
+    <td>@Customer.Notes</td> 
+    <td> 
+        <div class="d-flex justify-content-center gap-2"> 
+            <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailCustomer(Customer.Id)">Detail</button> 
+            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(Customer.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
+            <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeCustomerStatus(Customer.Id)">Role?</button> 
+        </div> 
+    </td> 
+</tr> 
+
+
+@code {
+
+    [Parameter] 
+    public CustomerResponse Customer { get; set; } = null!;
+    [Parameter]
+    public EventCallback<Guid> OnChangeCustomerStatus {get; set; }
+    [Parameter]
+    public EventCallback<Guid> OnDetailCustomer {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnDeleteCustomer {get; set; }
+
+    private async Task ChangeCustomerStatus(Guid id)
+    {
+        await OnChangeCustomerStatus.InvokeAsync(id);
+    }
+
+    private async Task PrepareDelete(Guid id)
+    {
+        await OnDeleteCustomer.InvokeAsync(id);
+    }
+
+    private async Task DetailCustomer(Guid id)
+    {
+        await OnDetailCustomer.InvokeAsync(id);
+    }
+}

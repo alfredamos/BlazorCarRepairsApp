@@ -1,0 +1,74 @@
+﻿@page "/Customers"
+@inject ICustomerRepo CustomerRepo
+@inject NavigationManager NavigationManager
+
+@attribute [Authorize(Roles = Roles.Admin)]
+
+<PageTitle>Customers</PageTitle>
+
+@if (_customers is null)
+{
+    <p>Loading customers...</p>
+}
+else if (!_customers.Any())
+{
+    <p>No customers found.</p>
+}
+else
+{
+    <CustomerTable 
+        Customers="_customers" 
+        OnChangeCustomerStatus="ChangeCustomerStatus"
+        OnConfirmDelete="DeleteCustomer"
+        OnDetailCustomer="DetailCustomer"
+        OnGetSearchItem="GetSearchItem"
+    />
+}
+
+@code {
+    private List<CustomerResponse>? _customers;
+    private string? _searchText;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            
+            Console.WriteLine($"The value of searchItem : {_searchText}");
+            _customers ??= await CustomerRepo.GetCustomers();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database Error: {ex.Message}");
+            
+            _customers = []; // Fallback to empty list to stop the loading loop
+        }
+    }
+
+    private async Task ChangeCustomerStatus(Guid id)
+    {
+        Console.WriteLine($"Change the status of customer with {id}");
+        await CustomerRepo.ChangeCustomerStatus(id);
+        _customers = await CustomerRepo.GetCustomers();
+    }
+    
+    private void DetailCustomer(Guid id)
+    {
+        NavigationManager.NavigateTo($"/customers/{id}");
+    }
+
+    private async Task DeleteCustomer(Guid id)
+    {
+        await CustomerRepo.DeleteCustomerById(id);
+        _customers = await CustomerRepo.GetCustomers(_searchText);
+    }
+
+    private async Task GetSearchItem(string query)
+    {
+        Console.WriteLine($"The search query : {query}");
+        _searchText = query;
+        
+        _customers = await CustomerRepo.GetCustomers(query);
+    }
+    
+}

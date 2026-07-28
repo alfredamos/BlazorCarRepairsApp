@@ -36,13 +36,13 @@ else
         {
             
             Console.WriteLine($"The value of searchItem : {_searchText}");
-            _users = await UserRepo.GetAllUsers() ?? new List<UserDto>();
+            _users ??= await UserRepo.GetAllUsers();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Database Error: {ex.Message}");
             
-            _users = new List<UserDto>(); // Fallback to empty list to stop the loading loop
+            _users = []; // Fallback to empty list to stop the loading loop
         }
     }
 
