@@ -1,4 +1,4 @@
-﻿@page "/customers/active"
+﻿@page "/customers/inactive"
 
 @inject ICustomerRepo CustomerRepo
 @inject NavigationManager NavigationManager
@@ -40,7 +40,7 @@ else
         try
         {
             
-            _customers ??= await CustomerRepo.GetActiveCustomers();
+            _customers ??= await CustomerRepo.GetInactiveCustomers();
         }
         catch (Exception ex)
         {
@@ -54,7 +54,7 @@ else
     {
         Console.WriteLine($"At point 3 of status change, id : {id}");
         await CustomerRepo.ChangeCustomerStatus(id);
-        _customers = await CustomerRepo.GetActiveCustomers();
+        _customers = await CustomerRepo.GetInactiveCustomers();
     }
     
     private void DetailCustomer(Guid id)
@@ -65,14 +65,14 @@ else
     private async Task DeleteCustomer(Guid id)
     {
         await CustomerRepo.DeleteCustomerById(id);
-        _customers = await CustomerRepo.GetActiveCustomers();
+        _customers = await CustomerRepo.GetInactiveCustomers();
     }
 
     private async Task GetSearchItem(string query)
     {
         Console.WriteLine($"The search query : {query}");
         
-        _customers = await CustomerRepo.GetActiveCustomers(query);
+        _customers = await CustomerRepo.GetInactiveCustomers(query);
     }
 
     private void CreateNewCustomer()

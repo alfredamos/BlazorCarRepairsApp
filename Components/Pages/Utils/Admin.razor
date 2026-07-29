@@ -1,0 +1,62 @@
+﻿@inject NavigationManager NavManager
+@implements IDisposable
+
+<div class="dropdown">
+    <button class="btn btn-link link-secondary dropdown-toggle text-decoration-none" 
+            type="button" 
+            @onclick="ToggleDropdown" 
+            aria-expanded="@_isOpen.ToString().ToLower()">
+        Admin
+    </button>
+    
+    <ul class="dropdown-menu dropdown-menu-end text-center @(_isOpen ? "show" : "")" style="min-width: 160px; overflow: hidden;">
+        <li class="w-100">
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="customers" Match="NavLinkMatch.All">Customers</NavLink>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li class="w-100">
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="customers/active" Match="NavLinkMatch.All"><i class="bi bi-plus-square-fill"></i>Customers</NavLink>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li class="w-100">
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="customers/inactive" Match="NavLinkMatch.All"><i class="bi bi-dash-square-fill"></i>Customers</NavLink>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li class="w-100">
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="users" Match="NavLinkMatch.All">Users</NavLink>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool _isOpen = false;
+
+    protected override void OnInitialized()
+    {
+        // Hook into the routing engine to listen for page changes
+        NavManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void ToggleDropdown()
+    {
+        _isOpen = !_isOpen;
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        // Close the menu when navigating and force Blazor to render the update
+        _isOpen = false;
+        StateHasChanged();
+    }
+
+    private void HandleLogout()
+    {
+        _isOpen = false;
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from the event safely to avoid memory leaks
+        NavManager.LocationChanged -= OnLocationChanged;
+    }
+}

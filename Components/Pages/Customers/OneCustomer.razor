@@ -5,12 +5,12 @@
     <td>@Customer.Name</td> 
     <td>@Customer.Email</td> 
     <td>@Customer.Phone</td> 
-    <td>@Customer.Address</td> 
+    <td class="text-nowrap" style="width: 1%;">@Customer.Address</td> 
     <td>@Customer.Birthdate</td> 
     <td>@Customer.Gender</td> 
     <td>@Customer.Active</td> 
     <td>@Customer.Notes</td> 
-    <td> 
+    <td class="text-nowrap" style="width: 1%;"> 
         <div class="d-flex justify-content-center gap-2"> 
             <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailCustomer(Customer.Id)">Detail</button> 
             <button type="button" class="btn btn-outline-warning btn-sm fw-bold" @onclick="() => UpdateCustomer(Customer.Id)">Edit</button> 
