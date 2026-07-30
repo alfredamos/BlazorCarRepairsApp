@@ -1,0 +1,79 @@
+﻿@page "/tickets/edit/{id:guid}"
+
+@inject ITicketRepo TicketRepo
+@inject NavigationManager NavigationManager
+
+<PageTitle>Ticket Edit Form</PageTitle>
+
+@if (Ticket is null)
+{
+    <p>Loading ticket edit form</p>
+}
+else
+{
+    <div class="row">
+    <div class="col-lg-6 mx-auto">
+        <EditForm Model="Ticket" method="post" OnValidSubmit="EditTicketForm" FormName="ticketEditForm">
+            <DataAnnotationsValidator />
+            <h2>Edit ticket form.</h2>
+            <hr />
+            <ValidationSummary class="text-danger" role="alert" />
+            <input @bind-value="Ticket.Id" hidden="hidden"/>
+            <input @bind-value="Ticket.CustomerId" hidden="hidden"/>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Ticket.Title" id="Ticket.Title" class="form-control" autocomplete="title" aria-required="true" placeholder="Change engine oil" />
+                <label for="Ticket.Title">Title</label>
+                <ValidationMessage For="() => Ticket.Title" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputTextArea @bind-Value="Ticket.Description" id="Ticket.Description" class="form-control" autocomplete="description" aria-required="true" placeholder="Clean filter and change oil" />
+                <label for="Ticket.Description">Description</label>
+                <ValidationMessage For="() => Ticket.Description" class="text-danger" />
+            </div>
+            <div class="d-flex flex-column align-content-center gap-2">
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Edit</button>
+                <button type="button" class="w-100 btn btn-lg btn-secondary" @onclick="BackToList">Cancel</button>
+            </div>
+            
+        </EditForm>
+    </div>
+</div>
+}
+
+
+
+@code {
+    [SupplyParameterFromForm] public TicketEditDto? Ticket { get; set; }
+    [Parameter] public Guid Id { get; set; }
+    private TicketResponse? _ticketResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _ticketResponse ??= await TicketRepo.GetTicketById(Id);
+        Ticket ??= new TicketEditDto
+        {
+            Id = _ticketResponse.Id,
+            Title = _ticketResponse.Title,
+            Description = _ticketResponse.Description,
+            CustomerId = _ticketResponse.CustomerId,
+        };
+
+    }
+
+    private async Task EditTicketForm()
+    {
+        if (Ticket is not null)
+        {
+            await TicketRepo.EditTicketById(Id, Ticket);
+            NavigationManager.NavigateTo("tickets");
+        }
+       
+        
+    }
+
+    private void BackToList()
+    {
+        NavigationManager.NavigateTo("tickets");
+    }
+}
+

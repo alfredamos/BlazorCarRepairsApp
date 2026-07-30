@@ -1,0 +1,80 @@
+﻿@page "/Tickets"
+@inject ITicketRepo TicketRepo
+@inject NavigationManager NavigationManager
+
+@attribute [Authorize(Roles = Roles.Admin)]
+
+<PageTitle>Tickets</PageTitle>
+
+@if (_tickets is null)
+{
+    <p>Loading tickets...</p>
+}
+else if (!_tickets.Any())
+{
+    <div class="d-flex justify-content-between align-content-center mx-auto mb-5">
+        <p>No tickets found.</p>
+        <button type="button" class="btn btn-outline-secondary btn-lg" @onclick="CreateNewTicket">Add New Ticket</button>
+    </div>
+    
+}
+else
+{
+    <TicketTable 
+        Tickets="_tickets" 
+        OnConfirmDelete="DeleteTicket"
+        OnCreateNewTicket="CreateNewTicket"
+        OnDetailTicket="DetailTicket"
+        OnEditTicket="UpdateTicket"
+        OnGetSearchItem="GetSearchItem"
+    />
+}
+
+@code {
+    private List<TicketResponse>? _tickets;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            
+            _tickets ??= await TicketRepo.GetTickets();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database Error: {ex.Message}");
+            
+            _tickets = []; // Fallback to empty list to stop the loading loop
+        }
+    }
+
+    private void DetailTicket(Guid id)
+    {
+        NavigationManager.NavigateTo($"/tickets/{id}");
+    }
+
+    private async Task DeleteTicket(Guid id)
+    {
+        await TicketRepo.DeleteTicketById(id);
+        _tickets = await TicketRepo.GetTickets();
+    }
+
+    private async Task GetSearchItem(string query)
+    {
+        Console.WriteLine($"The search query : {query}");
+        
+        _tickets = await TicketRepo.GetTickets(query);
+    }
+
+    private void CreateNewTicket()
+    {
+        NavigationManager.NavigateTo("tickets/add");
+    }
+
+    private void UpdateTicket(Guid id)
+    {
+        NavigationManager.NavigateTo($"tickets/edit/{id}");
+    }
+
+
+}

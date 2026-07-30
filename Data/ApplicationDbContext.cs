@@ -42,7 +42,6 @@ namespace BlazorCarRepairsApp.Data;
             .HasForeignKey(t => t.UserId) // Foreign key is in Token entity
             .OnDelete(DeleteBehavior.Cascade);   // Optional: Deletes tokens if user is deleted
         
-        //----> Configure a many-to-many relationship between Technician and Ticket.
         //----> Configure Composite Primary Key for the join entity
         modelBuilder.Entity<AssignedTicket>()
             .HasKey(at => new { at.TicketId, at.TechnicianId });

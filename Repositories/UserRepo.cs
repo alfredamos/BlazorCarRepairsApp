@@ -95,7 +95,16 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
         return UserMapper.MapUserToUserDto(user, role);
 
     }
-    
+
+    public async Task<UserDto> GetCurrentUserByEmail(string email)
+    {
+        //----> Fetch the user with the given email.
+        var user = await GetUserByEmail(email);
+        
+        //----> Send back response.
+        return UserMapper.MapUserToUserDto(user, Roles.Admin);
+    }
+
     private async Task<ApplicationUser> GetUserByEmail(string email)
     {
         //----> Fetch the user by email

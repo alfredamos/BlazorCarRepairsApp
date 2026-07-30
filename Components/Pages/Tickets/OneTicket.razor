@@ -1,0 +1,49 @@
+﻿<tr @key="Ticket.Id"> 
+    <td>
+        <img src="@Ticket.Image" alt="@Ticket.Name" class="img-fluid rounded-1" style="max-width: 40px; height: auto;" />
+    </td> 
+    <td class="text-nowrap" style="width: 1%;">@Ticket.Title</td>
+    <td class="text-nowrap" style="width: 1%;">@Ticket.Description</td>
+    <td>@Ticket.Name</td> 
+    <td>@Ticket.Email</td> 
+    <td>@Ticket.Phone</td> 
+    <td class="text-nowrap" style="width: 1%;">@Ticket.Address</td> 
+    <td>@Ticket.Gender</td> 
+    <td class="text-nowrap" style="width: 1%;"> 
+        <div class="d-flex justify-content-center gap-2"> 
+            <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailTicket(Ticket.Id)">Detail</button> 
+            <button type="button" class="btn btn-outline-warning btn-sm fw-bold" @onclick="() => UpdateTicket(Ticket.Id)">Edit</button> 
+            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(Ticket.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
+        </div> 
+    </td> 
+</tr> 
+
+
+@code {
+
+    [Parameter] 
+    public TicketResponse Ticket { get; set; } = null!;
+    [Parameter]
+    public EventCallback<Guid> OnDetailTicket {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnDeleteTicket {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnEditTicket {get; set; }
+
+    private async Task PrepareDelete(Guid id)
+    {
+        await OnDeleteTicket.InvokeAsync(id);
+    }
+
+    private async Task DetailTicket(Guid id)
+    {
+        await OnDetailTicket.InvokeAsync(id);
+    }
+
+    private async Task UpdateTicket(Guid id)
+    {
+        await OnEditTicket.InvokeAsync(id);
+    }
+}

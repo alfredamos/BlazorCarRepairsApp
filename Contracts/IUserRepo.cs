@@ -8,4 +8,5 @@ public interface IUserRepo
     Task<UserDto> DeleteUserById(Guid id);
     Task<List<UserDto>> GetAllUsers(string? searchItem = "");
     Task<UserDto> GetUserById(Guid id);
+    Task<UserDto> GetCurrentUserByEmail(string email);
 }

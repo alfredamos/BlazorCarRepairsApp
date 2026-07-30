@@ -15,6 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+//----> Register the standard HTTP Context accessor
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
@@ -22,6 +25,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 //----> Repositories.
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<ITechnicianRepo, TechnicianRepo>();
+builder.Services.AddScoped<ITicketRepo, TicketRepo>();
 builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
 
 builder.Services.AddAuthentication(options =>

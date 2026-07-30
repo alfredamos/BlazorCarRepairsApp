@@ -17,13 +17,13 @@ public static class TicketMapper
             UpdatedAt = DateTime.UtcNow,
         };
     }
-    public static Ticket MapTicketEditDtoToTicket(TicketEditDto dto, Ticket ticket)
+    public static Ticket MapTicketEditDtoToTicket(TicketEditDto dto, Ticket ticket, DateTime createdAt)
     {
         ticket.Id = dto.Id;
         ticket.Title = dto.Title;
         ticket.Description = dto.Description;
         ticket.CustomerId = dto.CustomerId;
-        ticket.CreatedAt = dto.CreatedAt;
+        ticket.CreatedAt = createdAt;
         ticket.UpdatedAt = DateTime.UtcNow;
         
         return ticket;
