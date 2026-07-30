@@ -13,7 +13,7 @@ public class CustomerEditDto
     
     [Required]
     [MaxLength(1000)]
-    public string Notes { get; set; } = string.Empty;
+    public string? Notes { get; set; } = string.Empty;
     
     public bool Active { get; set; } = true;
     

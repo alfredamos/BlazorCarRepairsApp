@@ -21,6 +21,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 
 //----> Repositories.
 builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<ITechnicianRepo, TechnicianRepo>();
 builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
 
 builder.Services.AddAuthentication(options =>

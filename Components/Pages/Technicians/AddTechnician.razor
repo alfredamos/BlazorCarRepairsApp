@@ -1,0 +1,71 @@
+﻿@page "/technicians/add"
+@using BlazorCarRepairsApp.Dto.Technicians
+
+@inject ITechnicianRepo TechnicianRepo
+@inject IUserRepo UserRepo
+@inject NavigationManager NavigationManager
+
+<PageTitle>Technician Create Form</PageTitle>
+
+@if (_users is null)
+{
+    <p>Loading technician create form</p>
+}
+else
+{
+    <div class="row">
+    <div class="col-lg-6 mx-auto">
+        <EditForm Model="Technician" method="post" OnValidSubmit="CreateNewTechnicianForm" FormName="customerCreateForm">
+            <DataAnnotationsValidator />
+            <h2>Create customer form.</h2>
+            <hr />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Technician.Specialty" id="Technician.Specialty" class="form-control" autocomplete="specialty" aria-required="true" placeholder="Engineer" />
+                <label for="Technician.Specialty">Specialty</label>
+                <ValidationMessage For="() => Technician.Specialty" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Technician.UserId" id="Technician.UserId" class="form-select" autocomplete="userId" aria-required="true" placeholder="userId">
+                    <option >Please select user!</option>
+                    @foreach (var user in _users)
+                    {
+                        <option value="@user.Id">@user.Name</option>
+                    }
+                    
+                </InputSelect>
+                <label for="Technician.UserId">User</label>
+                <ValidationMessage For="() => Technician.UserId" class="text-danger" />
+            </div>
+            <div class="d-flex flex-column align-content-center gap-2">
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Add</button>
+                <button type="button" class="w-100 btn btn-lg btn-secondary">Cancel</button>
+            </div>
+            
+        </EditForm>
+    </div>
+</div>
+}
+
+
+
+@code {
+    [SupplyParameterFromForm] public TechCreateDto Technician { get; set; } = null!;
+
+    private List<UserDto>? _users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _users ??= await UserRepo.GetAllUsers("Technician");
+        Technician ??= new();
+        
+    }
+
+    private async Task CreateNewTechnicianForm()
+    {
+        await TechnicianRepo.CreateTech(Technician);
+        NavigationManager.NavigateTo("technicians");
+        
+    }
+}
+

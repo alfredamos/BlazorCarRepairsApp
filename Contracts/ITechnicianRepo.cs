@@ -9,7 +9,7 @@ public interface ITechnicianRepo
     Task<ResponseMessage> DeleteTechById(Guid id);
     Task<ResponseMessage> EditTechById(Guid id, TechEditDto technician);
     Task<TechResponse> GetTechById(Guid id);
-    Task<List<TechResponse>> GetAllTechs();
+    Task<List<TechResponse>> GetAllTechs(string? searchItem = "");
     Task<TechResponse> GetTechByUserId(Guid userId);
-    Task<List<TechResponse>> GetTechBySpecialty(string specialty);
+    Task<List<TechResponse>> GetTechBySpecialty(string specialty, string? searchItem = "");
 }

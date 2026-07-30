@@ -1,0 +1,113 @@
+﻿@page "/technicians/{id:guid}"
+@using BlazorCarRepairsApp.Dto.Technicians
+
+@inject ITechnicianRepo TechnicianRepo
+@inject NavigationManager NavigationManager
+
+@if (Technician == null)
+{
+    <p>Technician detail is loading...</p>
+}
+else
+{
+    <div class="row mt-5">
+        <div class="col-4 mx-auto">
+            <div class="card" style="width: 18rem;">
+                <div class="d-flex justify-content-between align-content-center p-2">
+                    <img src="@Technician.Image" class="w-25 h-25 rounded-2" alt="@Technician.Name">
+                    <span class="fw-bolder">@Technician.Name</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-content-lg-center">
+                            <span>Email:</span>
+                            <span> @Technician.Email</span>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-content-lg-center">
+                            <span>Phone:</span>
+                            <span> @Technician.Phone</span>
+                        </div></li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-content-lg-center">
+                            <span>Specialty:</span>
+                            <span> @Technician.Specialty</span>
+                        </div></li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-content-lg-center">
+                            <span>DOB:</span>
+                            <span> @Technician.Birthdate</span>
+                        </div></li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-content-lg-center">
+                            <span>Gender:</span>
+                            <span> @Technician.Gender</span>
+                        </div></li>
+                </ul>
+                <div class="card-body d-flex justify-content-between align-content-lg-center">
+                    <button type="button" class="btn btn-link link-secondary text-decoration-none link-hover-secondary fw-bold" @onclick="BackToList">Back</button>
+                    <button type="button" class="btn btn-link link-danger text-decoration-none link-hover-danger fw-bold" @onclick="PrepareDelete">Delete</button>
+                </div>
+            </div>
+        </div>    
+    </div>
+}
+
+@if (_isModalOpen)
+{
+    <Modal ModalTitle="Delete Technician Dialog" 
+           ModalMessage="Do you want to delete this Technician?" 
+           BtnMessage="Delete" 
+           OnCancelClick="CloseModal"
+           OnDeleteClick="ConfirmDelete">
+    </Modal>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private TechResponse? Technician { get; set; }
+
+    private bool _isModalOpen;
+
+    private Guid _technicianIdToDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Technician ??= await TechnicianRepo.GetTechById(Id);
+        if (Technician != null)
+        {
+
+            _technicianIdToDelete = Technician.Id;
+
+        }
+    }
+
+    private void BackToList()
+    {
+        NavigationManager.NavigateTo("technicians");
+
+    }
+
+    private void PrepareDelete()
+    {
+        _isModalOpen = true; // Open the modal
+    }
+
+    private void CloseModal()
+    {
+        _isModalOpen = false; // Close the modal
+        _technicianIdToDelete = Guid.Empty;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        await TechnicianRepo.DeleteTechById(_technicianIdToDelete);
+
+        CloseModal(); // Reset state and close
+
+        NavigationManager.NavigateTo("technicians");
+    }
+
+}

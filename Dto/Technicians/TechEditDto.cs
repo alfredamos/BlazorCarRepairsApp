@@ -10,7 +10,7 @@ public class TechEditDto
     [MaxLength(30)]
     public string Specialty { get; set; } = string.Empty;
     
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
     
     public DateTime CreatedAt { get; set; }
     

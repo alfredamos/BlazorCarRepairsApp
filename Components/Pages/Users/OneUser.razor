@@ -30,7 +30,7 @@
     [Parameter]
     public EventCallback<Guid> OnDeleteUser {get; set; }
 
-    private async Task ChangeUserRole(string email)
+    private async Task ChangeUserRole(string? email)
     {
         await OnChangeUserRole.InvokeAsync(email);
     }

@@ -78,13 +78,28 @@ public class TechnicianRepo(ApplicationDbContext context) : ITechnicianRepo
         return TechnicianMapper.TechnicianToTechResponse(tech);
     }
 
-    public async Task<List<TechResponse>> GetAllTechs()
+    public async Task<List<TechResponse>> GetAllTechs(string? searchItem = "")
     {
-        //----> Fetch all technicians.
-        var techs = await context.Technicians.ToListAsync();
+        var query = context.Technicians.Include(cst => cst.User).AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(searchItem))
+        {
+            var search = searchItem.Trim().ToLower();
         
-        //----> Send back response.
-        return [.. techs.Select(TechnicianMapper.TechnicianToTechResponse)];
+            query = query.Where(cst => 
+                (cst.Specialty.ToLower().Contains(search)) ||
+                (cst.User != null && (
+                    (!string.IsNullOrEmpty(cst.User.Name) && cst.User.Name.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(cst.User.Email) && cst.User.Email.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(cst.User.PhoneNumber) && cst.User.PhoneNumber.Contains(search)) ||
+                    (!string.IsNullOrEmpty(cst.User.Gender) && cst.User.Gender.ToLower().Contains(search))
+                ))
+            );
+        }
+
+        var technicians = await query.ToListAsync();
+
+        return [.. technicians.Select(TechnicianMapper.TechnicianToTechResponse)];
     }
 
     public async Task<TechResponse> GetTechByUserId(Guid userId)
@@ -96,13 +111,13 @@ public class TechnicianRepo(ApplicationDbContext context) : ITechnicianRepo
         return tech is not null ? TechnicianMapper.TechnicianToTechResponse(tech) : throw new CustomException("Technician not found", HttpStatusCode.NotFound);
     }
 
-    public async Task<List<TechResponse>> GetTechBySpecialty(string specialty)
+    public async Task<List<TechResponse>> GetTechBySpecialty(string specialty, string? searchItem = "")
     {
-        //----> Fetch all technicians.
-        var techs = await context.Technicians.Where(tk => tk.Specialty.Equals(specialty)).ToListAsync();
+        //----> Fetch all technicians by specialty.
+        var techs = (await GetAllTechs(searchItem)).Where(tk => tk.Specialty.Contains(specialty, StringComparison.CurrentCultureIgnoreCase)).ToList();
         
         //----> Send back response.
-        return [.. techs.Select(TechnicianMapper.TechnicianToTechResponse)];
+        return techs;
     }
 
     private async Task<Technician> GetOneTechnician(Guid id)
