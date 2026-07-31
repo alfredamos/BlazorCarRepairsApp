@@ -82,3 +82,9 @@ h1:focus {
     color: var(--bs-white) !important;
     text-decoration: none !important;
 }
+
+.link-hover-warning:hover {
+    background-color: var(--bs-warning) !important;
+    color: var(--bs-black) !important;
+    text-decoration: none !important;
+}
