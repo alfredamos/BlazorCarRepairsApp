@@ -23,6 +23,7 @@ else
         OnConfirmDelete="DeleteUser"
         OnDetailUser="DetailUser"
         OnGetSearchItem="GetSearchItem"
+        OnGetUserTickets="GetUserTickets"
     />
 }
 
@@ -70,5 +71,10 @@ else
         _users = await UserRepo.GetAllUsers(query);
         StateHasChanged();
     }
-    
+
+    private void GetUserTickets((Guid userId, string userType)obj)
+    {
+        NavigationManager.NavigateTo(obj.userType == UserType.Customer ? $"/tickets/by-user-id/{obj.userId}" : $"/assign-tickets/by-user-id/{obj.userId}");
+    }
+
 }

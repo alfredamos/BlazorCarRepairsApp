@@ -18,6 +18,7 @@
             <th scope="col">Birthdate</th> 
             <th scope="col">Gender</th> 
             <th scope="col">Role</th> 
+            <th scope="col">UserType</th>
             <th scope="col" class="text-center">Action</th> 
         </tr> 
         </thead> 
@@ -29,6 +30,7 @@
                 OnChangeUserRole="ChangeUserRole"
                 OnDeleteUser="PrepareDelete"
                 OnDetailUser="DetailUser"
+                OnGetUserTickets="GetUserTickets"
             >
             </OneUser>
         } 
@@ -52,6 +54,7 @@
     [Parameter] public EventCallback<string> OnChangeUserRole { get; set; }
     [Parameter] public EventCallback<Guid> OnConfirmDelete { get; set; }
     [Parameter] public EventCallback<string> OnGetSearchItem { get; set; }
+    [Parameter] public EventCallback<(Guid, string)> OnGetUserTickets { get; set; }
 
     private bool _isModalOpen;
     private Guid _userIdToDelete;
@@ -100,5 +103,10 @@
     {
         await OnGetSearchItem.InvokeAsync(SearchItem);
     }
-    
+
+    private async Task GetUserTickets((Guid userId, string userType)obj)
+    {
+        await OnGetUserTickets.InvokeAsync(obj);
+    }
+
 }

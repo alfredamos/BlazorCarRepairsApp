@@ -1,6 +1,8 @@
-﻿@page "/Assign-Tickets/By-Tech-Id/{techId:guid}"
+﻿@page "/Assign-Tickets/By-User-Id/{userId:guid}"
+@using BlazorCarRepairsApp.Dto.Technicians
 
-@inject IAssignedTicketRepo TicketRepo
+@inject IAssignedTicketRepo ATicketRepo
+@inject ITechnicianRepo TechRepo
 @inject NavigationManager NavigationManager
 
 @attribute [Authorize(Roles = Roles.Admin)]
@@ -33,7 +35,10 @@ else
 
 @code {
     [Parameter]
-    public Guid TechId { get; set; }
+    public Guid UserId { get; set; }
+
+    private TechResponse? _tech;
+    private Guid _techId;
     
     private List<AssignedTicketResponse>? _tickets;
 
@@ -42,7 +47,9 @@ else
         try
         {
             
-            _tickets ??= await TicketRepo.GetAssignedTicketsByTechnicianId(TechId);
+            _tech ??= await TechRepo.GetTechByUserId(UserId);
+            _techId = _tech.Id;
+            _tickets ??= await ATicketRepo.GetAssignedTicketsByTechnicianId(_techId);
         }
         catch (Exception ex)
         {
@@ -54,8 +61,8 @@ else
 
     private async Task ChangeTicketStatus((Guid techId, Guid ticketId) id)
     {
-        await TicketRepo.ChangeAssignedTicketStatus(id.techId, id.ticketId);
-        _tickets = await TicketRepo.GetAssignedTicketsByTechnicianId(TechId);
+        await ATicketRepo.ChangeAssignedTicketStatus(id.techId, id.ticketId);
+        _tickets = await ATicketRepo.GetAssignedTicketsByTechnicianId(_techId);
         StateHasChanged();
     }
 
@@ -66,8 +73,8 @@ else
 
     private async Task DeleteTicket((Guid techId, Guid ticketId) id)
     {
-        await TicketRepo.DeleteAssignedTicketById(id.techId,  id.ticketId);
-        _tickets = await TicketRepo.GetAssignedTicketsByTechnicianId(TechId);
+        await ATicketRepo.DeleteAssignedTicketById(id.techId,  id.ticketId);
+        _tickets = await ATicketRepo.GetAssignedTicketsByTechnicianId(_techId);
         StateHasChanged();
     }
 

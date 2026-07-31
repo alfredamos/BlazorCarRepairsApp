@@ -28,6 +28,7 @@ else
         OnDetailCustomer="DetailCustomer"
         OnEditCustomer="UpdateCustomer"
         OnGetSearchItem="GetSearchItem"
+        OnGetCustomerTickets="GetCustomerTickets"
     />
 }
 
@@ -85,6 +86,11 @@ else
     private void UpdateCustomer(Guid id)
     {
         NavigationManager.NavigateTo($"customers/edit/{id}");
+    }
+
+    private void GetCustomerTickets(Guid customerId)
+    {
+        NavigationManager.NavigateTo($"tickets/by-customer-id/{customerId}");
     }
 
 

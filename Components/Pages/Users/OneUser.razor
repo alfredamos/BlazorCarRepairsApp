@@ -8,11 +8,13 @@
     <td>@User.Birthdate.ToShortDateString()</td> 
     <td>@User.Gender</td> 
     <td>@User.Role</td> 
+    <td>@User.UserType</td> 
     <td> 
         <div class="d-flex justify-content-center gap-2"> 
             <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailUser(User.Id)">Detail</button> 
             <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(User.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
             <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeUserRole(User.Email)">Role?</button> 
+            <button type="button" class="btn btn-outline-primary btn-sm fw-bold" @onclick="() => GetUserTickets(User.Id, User.UserType)">Tickets</button> 
         </div> 
     </td> 
 </tr> 
@@ -26,6 +28,8 @@
     public EventCallback<string> OnChangeUserRole {get; set; }
     [Parameter]
     public EventCallback<Guid> OnDetailUser {get; set; }
+    [Parameter]
+    public EventCallback<(Guid, string)> OnGetUserTickets {get; set; }
     
     [Parameter]
     public EventCallback<Guid> OnDeleteUser {get; set; }
@@ -44,4 +48,11 @@
     {
         await OnDetailUser.InvokeAsync(userId);
     }
+
+    private async Task GetUserTickets(Guid userId, string userType)
+    {
+        
+        await OnGetUserTickets.InvokeAsync((userId, userType));
+    }
+
 }

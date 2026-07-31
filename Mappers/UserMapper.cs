@@ -16,7 +16,8 @@ public static class UserMapper
             Phone = user.PhoneNumber,
             Image = user.ImagePath,
             Gender = user.Gender,
-            Role = role
+            Role = role,
+            UserType = user.UserType
         };
     }
 }

@@ -32,6 +32,7 @@
                 OnDeleteCustomer="PrepareDelete"
                 OnDetailCustomer="DetailCustomer"
                 OnEditCustomer="UpdateCustomer"
+                OnGetCustomerTickets="GetCustomerTickets"
             >
             </OneCustomer>
         } 
@@ -61,6 +62,9 @@
     [Parameter] public EventCallback OnCreateNewCustomer { get; set; }
     [Parameter]
     public EventCallback<Guid> OnEditCustomer {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnGetCustomerTickets {get; set; }
 
     private bool _isModalOpen;
     private Guid _customerIdToDelete;
@@ -119,6 +123,11 @@
     private async Task UpdateCustomer(Guid id)
     {
         await OnEditCustomer.InvokeAsync(id);
+    }
+    
+    private async Task GetCustomerTickets(Guid customerId)
+    {
+        await OnGetCustomerTickets.InvokeAsync(customerId);
     }
     
 }

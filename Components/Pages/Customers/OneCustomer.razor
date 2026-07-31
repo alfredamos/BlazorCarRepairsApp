@@ -16,6 +16,7 @@
             <button type="button" class="btn btn-outline-warning btn-sm fw-bold" @onclick="() => UpdateCustomer(Customer.Id)">Edit</button> 
             <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(Customer.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
             <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeCustomerStatus(Customer.Id)">Status?</button> 
+            <button type="button" class="btn btn-outline-primary btn-sm fw-bold" @onclick="() => GetCustomerTickets(Customer.Id)">Tickets</button> 
         </div> 
     </td> 
 </tr> 
@@ -35,6 +36,9 @@
     
     [Parameter]
     public EventCallback<Guid> OnEditCustomer {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnGetCustomerTickets {get; set; }
 
     private async Task ChangeCustomerStatus(Guid id)
     {
@@ -56,4 +60,10 @@
     {
         await OnEditCustomer.InvokeAsync(id);
     }
+
+    private async Task GetCustomerTickets(Guid customerId)
+    {
+        await OnGetCustomerTickets.InvokeAsync(customerId);
+    }
+
 }

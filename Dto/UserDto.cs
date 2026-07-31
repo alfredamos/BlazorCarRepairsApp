@@ -1,4 +1,6 @@
-﻿namespace BlazorCarRepairsApp.Dto;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BlazorCarRepairsApp.Dto;
 
 public class UserDto
 {
@@ -10,4 +12,7 @@ public class UserDto
     public string? Image { get; set; } = string.Empty;
     public string? Phone { get; set; } = string.Empty;
     public string Gender { get; set; } = string.Empty;
+    
+    [AllowedValues("Customer", "Technician", ErrorMessage = "UserType must be 'Customer', 'Technician'.")]
+    public string UserType { get; set; } = "Customer";
 }
