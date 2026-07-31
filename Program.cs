@@ -27,6 +27,7 @@ builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<ITechnicianRepo, TechnicianRepo>();
 builder.Services.AddScoped<ITicketRepo, TicketRepo>();
 builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
+builder.Services.AddScoped<IAssignedTicketRepo, AssignedTicketRepo>();
 
 builder.Services.AddAuthentication(options =>
     {

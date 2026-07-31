@@ -54,6 +54,7 @@ else
         Console.WriteLine($"At point 3 of status change, id : {id}");
         await CustomerRepo.ChangeCustomerStatus(id);
         _customers = await CustomerRepo.GetCustomers();
+        StateHasChanged();
     }
     
     private void DetailCustomer(Guid id)
@@ -65,6 +66,7 @@ else
     {
         await CustomerRepo.DeleteCustomerById(id);
         _customers = await CustomerRepo.GetCustomers();
+        StateHasChanged();
     }
 
     private async Task GetSearchItem(string query)
@@ -72,6 +74,7 @@ else
         Console.WriteLine($"The search query : {query}");
         
         _customers = await CustomerRepo.GetCustomers(query);
+        StateHasChanged();
     }
 
     private void CreateNewCustomer()

@@ -48,6 +48,7 @@ else
         Console.WriteLine($"Change the role of user with email {email}");
         await UserRepo.ChangeUserRole(email);
         _users = await UserRepo.GetAllUsers();
+        StateHasChanged();
     }
     
     private void DetailUser(Guid id)
@@ -59,6 +60,7 @@ else
     {
         await UserRepo.DeleteUserById(id);
         _users = await UserRepo.GetAllUsers();
+        StateHasChanged();
     }
 
     private async Task GetSearchItem(string query)
@@ -66,6 +68,7 @@ else
         Console.WriteLine($"The search query : {query}");
         
         _users = await UserRepo.GetAllUsers(query);
+        StateHasChanged();
     }
     
 }

@@ -11,6 +11,18 @@
     
     <ul class="dropdown-menu dropdown-menu-end text-center @(_isOpen ? "show" : "")" style="min-width: 160px; overflow: hidden;">
         <li class="w-100">
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="assign-tickets" Match="NavLinkMatch.All">AssignedTickets</NavLink>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li class="w-100">
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="assign-tickets/completed" Match="NavLinkMatch.All">Completed Tickets</NavLink>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li class="w-100">
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="assign-tickets/incompleted" Match="NavLinkMatch.All">Incompleted Tickets</NavLink>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li class="w-100">
             <NavLink class="dropdown-item text-decoration-none mx-auto" href="customers" Match="NavLinkMatch.All">Customers</NavLink>
         </li>
         <li><hr class="dropdown-divider"></li>

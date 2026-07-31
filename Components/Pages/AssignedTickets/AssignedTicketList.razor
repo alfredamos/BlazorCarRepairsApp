@@ -1,0 +1,82 @@
+﻿@page "/Assign-Tickets"
+
+@inject IAssignedTicketRepo TicketRepo
+@inject NavigationManager NavigationManager
+
+@attribute [Authorize(Roles = Roles.Admin)]
+
+<PageTitle>Assigned Tickets</PageTitle>
+
+@if (_tickets is null)
+{
+    <p>Loading tickets...</p>
+}
+else if (!_tickets.Any())
+{
+    <div class="d-flex justify-content-between align-content-center mx-auto mb-5">
+        <p>No assigned tickets found.</p>
+        <button type="button" class="btn btn-outline-secondary btn-lg" @onclick="CreateNewTicket">Add New Ticket</button>
+    </div>
+    
+}
+else
+{
+    <AssignedTicketTable 
+        Tickets="_tickets" 
+        OnChangeTicketStatus="ChangeTicketStatus"
+        OnConfirmDelete="DeleteTicket"
+        OnCreateNewTicket="CreateNewTicket"
+        OnDetailTicket="DetailTicket"
+        OnEditTicket="UpdateTicket"
+    />
+}
+
+@code {
+    private List<AssignedTicketResponse>? _tickets;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            
+            _tickets ??= await TicketRepo.GetAllAssignedTickets();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database Error: {ex.Message}");
+            
+            _tickets = []; // Fallback to empty list to stop the loading loop
+        }
+    }
+
+    private async Task ChangeTicketStatus((Guid techId, Guid ticketId) id)
+    {
+        await TicketRepo.ChangeAssignedTicketStatus(id.techId, id.ticketId);
+        _tickets = await TicketRepo.GetAllAssignedTickets();
+        StateHasChanged();
+    }
+
+    private void DetailTicket((Guid techId, Guid ticketId) id)
+    {
+        NavigationManager.NavigateTo($"/assign-tickets/{id.techId}/{id.ticketId}");
+    }
+
+    private async Task DeleteTicket((Guid techId, Guid ticketId) id)
+    {
+        await TicketRepo.DeleteAssignedTicketById(id.techId,  id.ticketId);
+        _tickets = await TicketRepo.GetAllAssignedTickets();
+        StateHasChanged();
+    }
+
+    private void CreateNewTicket()
+    {
+        NavigationManager.NavigateTo("assign-tickets/add");
+    }
+
+    private void UpdateTicket((Guid techId, Guid ticketId) id)
+    {
+        NavigationManager.NavigateTo($"assign-tickets/edit/{id.techId}/{id.ticketId}");
+    }
+
+
+}

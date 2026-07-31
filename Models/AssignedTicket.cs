@@ -13,8 +13,7 @@ public class AssignedTicket
 
     public Technician Technician { get; set; } = null!;
 
-    [EnumDataType(typeof(Status))]
-    public Status Status { get; set; }
+    [EnumDataType(typeof(Status))] public Status Status { get; set; } = Status.Open;
 
     public bool Completed { get; set; } = false;
 

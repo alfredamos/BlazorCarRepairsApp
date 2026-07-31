@@ -1,0 +1,62 @@
+﻿<tr @key="@($"{Ticket.TicketId}-{Ticket.TechnicianId}")"> 
+    <td class="text-nowrap" style="width: 1%;">@Ticket.TicketTitle</td>
+    <td class="text-nowrap" style="width: 1%;">@Ticket.TicketDescription</td>
+    <td>@Ticket.Status</td> 
+    <td>@Ticket.Completed</td> 
+    <td>@Ticket.AssignBy</td> 
+    <td>@Ticket.AssignAt</td> 
+    <td>@Ticket.CustomerName</td> 
+    <td>@Ticket.CustomerEmail</td> 
+    <td>@Ticket.CustomerPhone</td> 
+    <td class="text-nowrap" style="width: 1%;">@Ticket.CustomerAddress</td> 
+    <td>@Ticket.TechnicianName</td> 
+    <td>@Ticket.TechnicianEmail</td> 
+    <td>@Ticket.TechnicianPhone</td> 
+    <td>@Ticket.TechnicianSpecialty</td> 
+    <td class="text-nowrap" style="width: 1%;"> 
+        <div class="d-flex justify-content-center gap-2"> 
+            <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailTicket(Ticket.TechnicianId, Ticket.TicketId)">Detail</button> 
+            <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => ChangeTicketStatus(Ticket.TechnicianId, Ticket.TicketId)">Status?</button> 
+            <button type="button" class="btn btn-outline-warning btn-sm fw-bold" @onclick="() => UpdateTicket(Ticket.TechnicianId, Ticket.TicketId)">Edit</button> 
+            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(Ticket.TechnicianId, Ticket.TicketId)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
+        </div> 
+    </td> 
+</tr> 
+
+
+@code {
+
+    [Parameter] 
+    public AssignedTicketResponse Ticket { get; set; } = null!;
+    [Parameter]
+    public EventCallback<(Guid TechId, Guid TicketId)> OnDetailTicket {get; set; }
+    
+    [Parameter]
+    public EventCallback<(Guid TechId, Guid TicketId)> OnDeleteTicket {get; set; }
+    
+    [Parameter]
+    public EventCallback<(Guid TechId, Guid TicketId)> OnChangeTicketStatus {get; set; }
+    
+    [Parameter]
+    public EventCallback<(Guid TechId, Guid TicketId)> OnEditTicket {get; set; }
+
+    private async Task ChangeTicketStatus(Guid techId, Guid ticketId)
+    {
+        await OnChangeTicketStatus.InvokeAsync((techId, ticketId));
+    }
+    
+    private async Task PrepareDelete(Guid techId, Guid ticketId)
+    {
+        await OnDeleteTicket.InvokeAsync((techId, ticketId));
+    }
+
+    private async Task DetailTicket(Guid techId, Guid ticketId)
+    {
+        await OnDetailTicket.InvokeAsync((techId, ticketId));
+    }
+
+    private async Task UpdateTicket(Guid techId, Guid ticketId)
+    {
+        await OnEditTicket.InvokeAsync((techId, ticketId));
+    }
+}

@@ -1,10 +1,11 @@
-﻿@page "/Tickets"
-@inject ITicketRepo TicketRepo
+﻿@page "/Assign-Tickets/Incompleted"
+
+@inject IAssignedTicketRepo TicketRepo
 @inject NavigationManager NavigationManager
 
 @attribute [Authorize(Roles = Roles.Admin)]
 
-<PageTitle>Tickets</PageTitle>
+<PageTitle>Assigned Tickets</PageTitle>
 
 @if (_tickets is null)
 {
@@ -13,32 +14,31 @@
 else if (!_tickets.Any())
 {
     <div class="d-flex justify-content-between align-content-center mx-auto mb-5">
-        <p>No tickets found.</p>
+        <p>No assigned tickets found.</p>
         <button type="button" class="btn btn-outline-secondary btn-lg" @onclick="CreateNewTicket">Add New Ticket</button>
     </div>
     
 }
 else
 {
-    <TicketTable 
+    <AssignedTicketTable 
         Tickets="_tickets" 
         OnConfirmDelete="DeleteTicket"
         OnCreateNewTicket="CreateNewTicket"
         OnDetailTicket="DetailTicket"
         OnEditTicket="UpdateTicket"
-        OnGetSearchItem="GetSearchItem"
     />
 }
 
 @code {
-    private List<TicketResponse>? _tickets;
+    private List<AssignedTicketResponse>? _tickets;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             
-            _tickets ??= await TicketRepo.GetTickets();
+            _tickets ??= await TicketRepo.GetUncompletedAssignedTickets();
         }
         catch (Exception ex)
         {
@@ -48,34 +48,26 @@ else
         }
     }
 
-    private void DetailTicket(Guid id)
+    private void DetailTicket((Guid techId, Guid ticketId) id)
     {
-        NavigationManager.NavigateTo($"/tickets/{id}");
+        NavigationManager.NavigateTo($"/assign-tickets/{id.techId}/{id.ticketId}");
     }
 
-    private async Task DeleteTicket(Guid id)
+    private async Task DeleteTicket((Guid techId, Guid ticketId) id)
     {
-        await TicketRepo.DeleteTicketById(id);
-        _tickets = await TicketRepo.GetTickets();
-        StateHasChanged();
-    }
-
-    private async Task GetSearchItem(string query)
-    {
-        Console.WriteLine($"The search query : {query}");
-        
-        _tickets = await TicketRepo.GetTickets(query);
+        await TicketRepo.DeleteAssignedTicketById(id.techId,  id.ticketId);
+        _tickets = await TicketRepo.GetUncompletedAssignedTickets();
         StateHasChanged();
     }
 
     private void CreateNewTicket()
     {
-        NavigationManager.NavigateTo("tickets/add");
+        NavigationManager.NavigateTo("assign-tickets/add");
     }
 
-    private void UpdateTicket(Guid id)
+    private void UpdateTicket((Guid techId, Guid ticketId) id)
     {
-        NavigationManager.NavigateTo($"tickets/edit/{id}");
+        NavigationManager.NavigateTo($"assign-tickets/edit/{id.techId}/{id.ticketId}");
     }
 
 

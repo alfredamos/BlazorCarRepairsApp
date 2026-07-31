@@ -12,8 +12,6 @@ namespace BlazorCarRepairsApp.Repositories;
 
 public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccessor httpContextAccessor , IUserRepo userRepo) : IAssignedTicketRepo
 {
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-
     public async Task<ResponseMessage> CreateAssignedTicket(AssignedTicketCreateDto assignedTicketDto)
     {
         //----> Get the name of admin user as assignor
@@ -37,14 +35,15 @@ public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccesso
         };
     }
 
-    public async Task<ResponseMessage> ChangeAssignedTicketStatus(Guid ticketId, Guid technicianId)
+    public async Task<ResponseMessage> ChangeAssignedTicketStatus(Guid technicianId, Guid ticketId)
     {
         //----> Fetch the assigned-ticket with the giving ids.
-        var  assignedTicket = await GetOneAssignedTicket(ticketId, technicianId);
+        var  assignedTicket = await GetOneAssignedTicket(technicianId, ticketId);
         
         //----> Get the ticket status.
         assignedTicket.Completed = !assignedTicket.Completed;
         assignedTicket.Status = assignedTicket.Completed ? Status.Closed : Status.Open;
+        context.AssignedTickets.Update(assignedTicket);
         await context.SaveChangesAsync();
 
         return new ResponseMessage
@@ -55,10 +54,10 @@ public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccesso
         };
     }
 
-    public async Task<ResponseMessage> DeleteAssignedTicketById(Guid ticketId, Guid technicianId)
+    public async Task<ResponseMessage> DeleteAssignedTicketById(Guid technicianId, Guid ticketId)
     {
         //----> Get the assigned-ticket with the giving ids.
-        var assignedTicket = await GetOneAssignedTicket(ticketId, technicianId);
+        var assignedTicket = await GetOneAssignedTicket(technicianId, ticketId);
         
         //----> Delete the assigned-ticket with the giving ids.
         context.AssignedTickets.Remove(assignedTicket);
@@ -73,13 +72,16 @@ public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccesso
         };
     }
 
-    public async Task<ResponseMessage> EditAssignedTicketById(Guid ticketId, Guid technicianId, AssignedTicketEditDto assignedTicketRequest)
+    public async Task<ResponseMessage> EditAssignedTicketById(Guid technicianId, Guid ticketId, AssignedTicketEditDto tkRequest)
     {
         //----> Get the assigned-ticket with the giving ids.
-        var assignedTicket = await GetOneAssignedTicket(ticketId, technicianId);
+        var assignedTicket = await GetOneAssignedTicket(technicianId, ticketId);
         
-        //----> Map assigned-ticket-edit-dto to assigned-ticket.
-        assignedTicket = AssignedTicketMapper.MapAssignedTicketEditDtoToAssignedTicket(assignedTicketRequest, assignedTicket);
+        //----> Check the status.
+        Console.WriteLine($"In edit-assigned-ticket, completed : {tkRequest.Completed}");
+        Console.WriteLine($"In edit-assigned-ticket, completed : {tkRequest.Completed}");
+        assignedTicket.Status = tkRequest.Status;
+        assignedTicket.Completed  = tkRequest.Status == Status.Closed;
         
         //----> Update the assigned-ticket details in db.
         context.AssignedTickets.Update(assignedTicket);
@@ -106,10 +108,10 @@ public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccesso
         return [.. assignedTickets.Select(AssignedTicketMapper.MapToAssignedTicketResponse)];
     }
 
-    public async Task<AssignedTicketResponse> GetAssignedTicketById(Guid ticketId, Guid technicianId)
+    public async Task<AssignedTicketResponse> GetAssignedTicketById(Guid technicianId, Guid ticketId)
     {
         //----> Get assigned-tickets by ticket-id.
-       var assignedTicket = await GetOneAssignedTicket(ticketId, technicianId);
+       var assignedTicket = await GetOneAssignedTicket(technicianId, ticketId);
        
        //----> Send back response.
        return AssignedTicketMapper.MapToAssignedTicketResponse(assignedTicket);
@@ -151,7 +153,7 @@ public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccesso
         return tickets;
     }
 
-    private async Task<AssignedTicket> GetOneAssignedTicket(Guid ticketId, Guid technicianId)
+    private async Task<AssignedTicket> GetOneAssignedTicket(Guid technicianId, Guid ticketId)
     {
         //----> Fetch the assigned ticket with the giving ids.
         var ticket = await context.AssignedTickets
@@ -167,8 +169,8 @@ public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccesso
     private  async Task<UserDto> GetCurrentUser()
     {
         //----> Get the HTTP context.
-        var httpContext = _httpContextAccessor.HttpContext;
-        if (httpContext is null) throw new CustomException("You need to be logged in first", HttpStatusCode.Unauthorized);;
+        var httpContext = httpContextAccessor.HttpContext;
+        if (httpContext is null) throw new CustomException($"You need to be logged in first", HttpStatusCode.Unauthorized);
         var email = httpContext.User.Identity?.Name;
         if (email is null) throw new CustomException("You must login!", HttpStatusCode.Unauthorized);
         var user = await userRepo.GetCurrentUserByEmail(email);

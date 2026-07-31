@@ -1,0 +1,79 @@
+﻿@page "/assign-tickets/edit/{techId:guid}/{ticketId:guid}"
+
+@inject IAssignedTicketRepo TicketRepo
+@inject NavigationManager NavigationManager
+
+<PageTitle>Assigned Ticket Edit Form</PageTitle>
+
+@if (Ticket is null)
+{
+    <p>Loading assigned ticket edit form</p>
+}
+else
+{
+    <div class="row">
+    <div class="col-lg-6 mx-auto">
+        <EditForm Model="Ticket" method="post" OnValidSubmit="EditAssignedTicketForm" FormName="assignedTicketEditForm">
+            <DataAnnotationsValidator />
+            <h2>Edit assigned ticket form.</h2>
+            <hr />
+            <ValidationSummary class="text-danger" role="alert" />
+            <input @bind-value="Ticket.TechnicianId" hidden="hidden"/>
+            <input @bind-value="Ticket.TicketId" hidden="hidden"/>
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Ticket.Status" id="Ticket.Status" class="form-select" autocomplete="status" aria-required="true" placeholder="status">
+                    <option >Please select Tech!</option>
+                    <option value="@Status.Closed">@Status.Closed</option>
+                    <option value="@Status.Open">@Status.Open</option>
+                </InputSelect>
+                <label for="Ticket.Status">Status</label>
+                <ValidationMessage For="() => Ticket.Status" class="text-danger" />
+            </div>
+            <div class="d-flex flex-column align-content-center gap-2">
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Edit</button>
+                <button type="button" class="w-100 btn btn-lg btn-secondary" @onclick="BackToList">Cancel</button>
+            </div>
+            
+        </EditForm>
+    </div>
+</div>
+}
+
+
+
+@code {
+    [SupplyParameterFromForm] public AssignedTicketEditDto? Ticket { get; set; }
+    [Parameter] public Guid TechId { get; set; }
+    [Parameter] public Guid TicketId { get; set; }
+    private AssignedTicketResponse? _ticketResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _ticketResponse ??= await TicketRepo.GetAssignedTicketById(TechId, TicketId);
+        Ticket ??= new AssignedTicketEditDto
+        {
+            TechnicianId= _ticketResponse.TechnicianId,
+            TicketId = _ticketResponse.TicketId,
+            Completed = _ticketResponse.Completed,
+            Status = _ticketResponse.Status,
+        };
+
+    }
+
+    private async Task EditAssignedTicketForm()
+    {
+        if (Ticket is not null)
+        {
+            await TicketRepo.EditAssignedTicketById(TechId, TicketId, Ticket);
+            NavigationManager.NavigateTo("assign-tickets");
+        }
+       
+        
+    }
+
+    private void BackToList()
+    {
+        NavigationManager.NavigateTo("assign-tickets");
+    }
+}
+

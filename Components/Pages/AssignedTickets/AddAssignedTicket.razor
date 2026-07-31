@@ -1,0 +1,87 @@
+﻿@page "/assign-tickets/add"
+@using BlazorCarRepairsApp.Dto.Technicians
+
+@inject IAssignedTicketRepo ATicketRepo
+@inject ITechnicianRepo TechRepo
+@inject ITicketRepo TicketRepo
+@inject NavigationManager NavigationManager
+
+<PageTitle>Assigned Ticket Create Form</PageTitle>
+
+@if (_technicians is null && _tickets is null)
+{
+    <p>Loading assigned ticket create form</p>
+}
+else if(_technicians is not null && _tickets is not null)
+{
+    <div class="row">
+    <div class="col-lg-6 mx-auto">
+        <EditForm Model="Ticket" method="post" OnValidSubmit="CreateNewTicketForm" FormName="ticketCreateForm">
+            <DataAnnotationsValidator />
+            <h2>Create assigned ticket form.</h2>
+            <hr />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Ticket.TechnicianId" id="Ticket.TechnicianId" class="form-select" autocomplete="technicianId" aria-required="true" placeholder="technicianId">
+                    <option >Please select Tech!</option>
+                    @foreach (var tech in _technicians)
+                    {
+                        <option value="@tech.Id">@tech.Name</option>
+                    }
+                    
+                </InputSelect>
+                <label for="Ticket.TechnicianId">Technician</label>
+                <ValidationMessage For="() => Ticket.TechnicianId" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Ticket.TicketId" id="Ticket.TicketId" class="form-select" autocomplete="ticketId" aria-required="true" placeholder="ticketId">
+                    <option >Please select Ticket!</option>
+                    @foreach (var ticket in _tickets)
+                    {
+                        <option value="@ticket.Id">@ticket.Title</option>
+                    }
+                    
+                </InputSelect>
+                <label for="Ticket.TicketId">Ticket</label>
+                <ValidationMessage For="() => Ticket.TicketId" class="text-danger" />
+            </div>
+            <div class="d-flex flex-column align-content-center gap-2">
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Add</button>
+                <button type="button" class="w-100 btn btn-lg btn-secondary" @onclick="BackToList">Cancel</button>
+            </div>
+            
+        </EditForm>
+    </div>
+</div>
+}
+
+
+
+@code {
+    [SupplyParameterFromForm] public AssignedTicketCreateDto Ticket { get; set; } = null!;
+
+    private List<TicketResponse>? _tickets;
+    private List<TechResponse>? _technicians;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        _technicians ??= await TechRepo.GetAllTechs();
+        _tickets ??= await TicketRepo.GetTickets();
+        Ticket ??= new();
+        
+    }
+
+    private async Task CreateNewTicketForm()
+    {
+        await ATicketRepo.CreateAssignedTicket(Ticket);
+        NavigationManager.NavigateTo("assign-tickets");
+        
+    }
+
+    private void BackToList()
+    {
+        NavigationManager.NavigateTo("assign-tickets");
+    }
+}
+

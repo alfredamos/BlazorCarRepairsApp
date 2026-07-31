@@ -18,16 +18,6 @@ public static class AssignedTicketMapper
         };
     }
     
-    public static AssignedTicket MapAssignedTicketEditDtoToAssignedTicket(AssignedTicketEditDto dto, AssignedTicket assignedTicket)
-    {
-        assignedTicket.TicketId = dto.TicketId;
-        assignedTicket.TechnicianId = dto.TechnicianId;
-        assignedTicket.Status = dto.Completed ? Status.Closed : Status.Open;
-        assignedTicket.Completed = dto.Completed;
-
-        return assignedTicket;
-    }
-
     public static AssignedTicketResponse MapToAssignedTicketResponse(AssignedTicket assignedTicket)
     {
         return new AssignedTicketResponse

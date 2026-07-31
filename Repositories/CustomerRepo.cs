@@ -24,6 +24,7 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
         
         //----> Update customer.
         context.Update(customer);
+        await context.SaveChangesAsync();
         
         //----> Send back response.
         return new ResponseMessage
