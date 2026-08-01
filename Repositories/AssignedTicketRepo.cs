@@ -16,7 +16,7 @@ public class AssignedTicketRepo(ApplicationDbContext context, IUserRepo userRepo
     {
         //----> Check for duplicate assignment.
         var ticket = await FetchOneAssignedTicket(atkDto.TechnicianId, atkDto.TicketId);
-        if (ticket != null) throw new CustomException("Duplicate assigned ticket!", HttpStatusCode.Conflict);
+        if (ticket is not null) throw new CustomException("Duplicate assigned ticket!", HttpStatusCode.Conflict);
         
         //----> Get the name of admin user as assignor
         var assignBy = (await userRepo.GetCurrentUser()).Name;

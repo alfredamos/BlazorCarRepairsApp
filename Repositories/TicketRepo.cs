@@ -120,7 +120,7 @@ public class TicketRepo(ApplicationDbContext context) : ITicketRepo
     private async Task<Ticket> GetOneTicket(Guid id)
     {
         //----> Fetch the ticket with the giving id.
-        var ticket = await context.Tickets.Include(tk => tk.Customer.User).AsNoTracking()
+        var ticket = await context.Tickets.Include(tk => tk.Customer).ThenInclude(tk => tk.User).AsNoTracking()
             .FirstOrDefaultAsync(tk => tk.Id.Equals(id));
 
         //----> Check for null ticket and send back response.
