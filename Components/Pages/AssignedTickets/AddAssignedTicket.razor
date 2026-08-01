@@ -6,6 +6,8 @@
 @inject ITicketRepo TicketRepo
 @inject NavigationManager NavigationManager
 
+@attribute [Authorize(Roles = Roles.Admin)]
+
 <PageTitle>Assigned Ticket Create Form</PageTitle>
 
 @if (_technicians is null && _tickets is null)

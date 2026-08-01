@@ -1,7 +1,10 @@
-﻿@page "/Users/{id:guid}"
+﻿@page "/Users/{userId:guid}"
+@using BlazorCarRepairsApp.Filters
 
 @inject IUserRepo UserRepo
 @inject NavigationManager NavigationManager
+
+@attribute [UserOwnerOrAdmin]
 
 @if (User == null)
 {
@@ -64,7 +67,7 @@ else
 }
 
 @code {
-    [Parameter] public Guid Id { get; set; }
+    [Parameter] public Guid UserId { get; set; }
 
     private UserDto? User { get; set; }
 
@@ -74,7 +77,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        User ??= await UserRepo.GetUserById(Id);
+        User ??= await UserRepo.GetUserById(UserId);
         if (User != null)
         {
 

@@ -1,7 +1,10 @@
-﻿@page "/customers/edit/{id:guid}"
+﻿@page "/customers/edit/{customerId:guid}"
+@using BlazorCarRepairsApp.Filters
 
 @inject ICustomerRepo CustomerRepo
 @inject NavigationManager NavigationManager
+
+@attribute [CustomerOwnerOrAdmin]
 
 <PageTitle>Customer Edit Form</PageTitle>
 
@@ -43,14 +46,14 @@ else
 
 
 @code {
-    [Parameter] public Guid Id { get; set; }
+    [Parameter] public Guid CustomerId { get; set; }
     [SupplyParameterFromForm] public CustomerEditDto? Customer { get; set; }
 
     private CustomerResponse? _customerResponse;
 
     protected override async Task OnInitializedAsync()
     {
-        _customerResponse ??=  await CustomerRepo.GetCustomerById(Id);
+        _customerResponse ??=  await CustomerRepo.GetCustomerById(CustomerId);
         Customer ??= new CustomerEditDto
         {
             Id = _customerResponse.Id,
@@ -64,7 +67,7 @@ else
 
     private async Task EditCustomerForm()
     {
-        await CustomerRepo.EditCustomerById(Id, Customer!);
+        await CustomerRepo.EditCustomerById(CustomerId, Customer!);
         NavigationManager.NavigateTo("customers");
         
     }

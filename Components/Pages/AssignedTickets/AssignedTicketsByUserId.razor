@@ -1,11 +1,12 @@
 ﻿@page "/Assign-Tickets/By-User-Id/{userId:guid}"
 @using BlazorCarRepairsApp.Dto.Technicians
+@using BlazorCarRepairsApp.Filters
 
 @inject IAssignedTicketRepo ATicketRepo
 @inject ITechnicianRepo TechRepo
 @inject NavigationManager NavigationManager
 
-@attribute [Authorize(Roles = Roles.Admin)]
+@attribute [UserOwnerOrAdmin]
 
 <PageTitle>Assigned Tickets</PageTitle>
 

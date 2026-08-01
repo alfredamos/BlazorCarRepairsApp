@@ -4,6 +4,8 @@
 @inject ICustomerRepo CustomerRepo
 @inject NavigationManager NavigationManager
 
+@attribute [Authorize(Roles = Roles.Admin)]
+
 <PageTitle>Ticket Create Form</PageTitle>
 
 @if (_customers is null)

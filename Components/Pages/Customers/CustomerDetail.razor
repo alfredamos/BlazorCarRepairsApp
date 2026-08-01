@@ -1,7 +1,10 @@
-﻿@page "/Customers/{id:guid}"
+﻿@page "/Customers/{customerId:guid}"
+@using BlazorCarRepairsApp.Filters
 
 @inject ICustomerRepo CustomerRepo
 @inject NavigationManager NavigationManager
+
+@attribute [CustomerOwnerOrAdmin]
 
 @if (Customer == null)
 {
@@ -74,7 +77,7 @@ else
 }
 
 @code {
-    [Parameter] public Guid Id { get; set; }
+    [Parameter] public Guid CustomerId { get; set; }
 
     private CustomerResponse? Customer { get; set; }
 
@@ -84,7 +87,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Customer ??= await CustomerRepo.GetCustomerById(Id);
+        Customer ??= await CustomerRepo.GetCustomerById(CustomerId);
         if (Customer != null)
         {
 

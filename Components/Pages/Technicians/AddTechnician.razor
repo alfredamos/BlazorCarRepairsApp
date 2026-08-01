@@ -5,6 +5,8 @@
 @inject IUserRepo UserRepo
 @inject NavigationManager NavigationManager
 
+@attribute [Authorize(Roles = Roles.Admin)]
+
 <PageTitle>Technician Create Form</PageTitle>
 
 @if (_users is null)

@@ -1,7 +1,10 @@
 ﻿@page "/Assign-Tickets/{techId:guid}/{ticketId:guid}"
+@using BlazorCarRepairsApp.Filters
 
 @inject IAssignedTicketRepo TicketRepo
 @inject NavigationManager NavigationManager
+
+@attribute [TechnicianOwnerOrAdmin]
 
 @if (_ticket is null)
 {

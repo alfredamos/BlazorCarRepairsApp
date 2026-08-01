@@ -1,7 +1,10 @@
 ﻿@page "/assign-tickets/edit/{techId:guid}/{ticketId:guid}"
+@using BlazorCarRepairsApp.Filters
 
 @inject IAssignedTicketRepo TicketRepo
 @inject NavigationManager NavigationManager
+
+@attribute [TechnicianOwnerOrAdmin]
 
 <PageTitle>Assigned Ticket Edit Form</PageTitle>
 

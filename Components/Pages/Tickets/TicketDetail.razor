@@ -3,6 +3,8 @@
 @inject ITicketRepo TicketRepo
 @inject NavigationManager NavigationManager
 
+@attribute [Authorize(Roles = Roles.Admin)]
+
 @if (Ticket == null)
 {
     <p>Ticket detail is loading...</p>

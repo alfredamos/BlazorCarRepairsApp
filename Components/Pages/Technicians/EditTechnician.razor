@@ -1,7 +1,10 @@
 ﻿@page "/technicians/edit/{id:guid}"
 @using BlazorCarRepairsApp.Dto.Technicians
+@using BlazorCarRepairsApp.Filters
 @inject ITechnicianRepo TechnicianRepo
 @inject NavigationManager NavigationManager
+
+@attribute [TechnicianOwnerOrAdmin]
 
 <PageTitle>Technician Edit Form</PageTitle>
 
