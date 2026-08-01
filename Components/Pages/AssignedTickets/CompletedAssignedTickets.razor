@@ -27,6 +27,7 @@ else
         OnCreateNewTicket="CreateNewTicket"
         OnDetailTicket="DetailTicket"
         OnEditTicket="UpdateTicket"
+        OnGetSearchItem="GetSearchItem"
     />
 }
 
@@ -57,6 +58,14 @@ else
     {
         await TicketRepo.DeleteAssignedTicketById(id.techId,  id.ticketId);
         _tickets = await TicketRepo.GetCompletedAssignedTickets();
+        StateHasChanged();
+    }
+    
+    private async Task GetSearchItem(string query)
+    {
+        Console.WriteLine($"The search query : {query}");
+        
+        _tickets = await TicketRepo.GetCompletedAssignedTickets(query);
         StateHasChanged();
     }
 

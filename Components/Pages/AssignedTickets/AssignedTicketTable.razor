@@ -1,6 +1,10 @@
 ﻿<!-- Responsive wrapper container -->
 <div class="card-header mt-2 mb-3">
     <h3 class="text-lg-center mb-2">List of Tickets</h3>
+    <div class="d-flex align-content-center gap-2">
+        <input @bind-value="SearchItem" class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search"/>
+        <button class=" btn btn-outline-primary bi-search" @onclick="GetSearchItem"></button>
+    </div>
 </div>
 <div class="table-responsive">
     <table class="table table-striped align-middle"> 
@@ -60,7 +64,19 @@
     [Parameter] public EventCallback OnCreateNewTicket { get; set; }
     [Parameter]
     public EventCallback<(Guid TechId, Guid TicketId)> OnEditTicket {get; set; }
+    [Parameter] public EventCallback<string> OnGetSearchItem { get; set; }
+    
+    private string? SearchItem
+    {
+        get;
+        set
+        {
+            field = value;
+            _searchText = !string.IsNullOrWhiteSpace(_searchText) ? value : "";
+        }
+    }
 
+    private string? _searchText;
     private bool _isModalOpen;
     private (Guid techId, Guid ticketId )_ticketIdToDelete;
     
@@ -96,6 +112,11 @@
     private async Task CreateNewTicket()
     {
         await OnCreateNewTicket.InvokeAsync();
+    }
+    
+    private async Task GetSearchItem()
+    {
+        await OnGetSearchItem.InvokeAsync(SearchItem);
     }
 
     private async Task UpdateTicket((Guid techId, Guid ticketId) id)
