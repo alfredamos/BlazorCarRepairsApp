@@ -101,10 +101,22 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
         //----> Get the HTTP context.
         var httpContext = httpContextAccessor.HttpContext;
         if (httpContext is null) throw new CustomException($"You need to be logged in first", HttpStatusCode.Unauthorized);
+        
+        //----> Get user email.
         var email = httpContext.User.Identity?.Name;
         if (email is null) throw new CustomException("You must login!", HttpStatusCode.Unauthorized);
+        
+        //----> Get the current user.
         var user = await GetUserByEmail(email);
-        return UserMapper.MapUserToUserDto(user, Roles.Admin);
+        
+        //----> Get user role.
+        var role =  (await userManager.GetRolesAsync(user)).FirstOrDefault();
+        
+        //----> Check for null role.
+        if (role == null) throw new CustomException("User has no valid role!", HttpStatusCode.NotFound);
+        
+        //----> Send back response.
+        return UserMapper.MapUserToUserDto(user, role);
 
     }
     
