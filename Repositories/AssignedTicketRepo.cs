@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlazorCarRepairsApp.Repositories;
 
-public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccessor httpContextAccessor , IUserRepo userRepo) : IAssignedTicketRepo
+public class AssignedTicketRepo(ApplicationDbContext context, IUserRepo userRepo) : IAssignedTicketRepo
 {
     public async Task<ResponseMessage> CreateAssignedTicket(AssignedTicketCreateDto assignedTicketDto)
     {
         //----> Get the name of admin user as assignor
-        var assignBy = (await GetCurrentUser()).Name;
+        var assignBy = (await userRepo.GetCurrentUser()).Name;
         if (assignBy is null) throw new CustomException("You must login!", HttpStatusCode.Unauthorized);
         
         //----> Map assigned-ticket-create-dto to Assigned-ticket.
@@ -166,15 +166,5 @@ public class AssignedTicketRepo(ApplicationDbContext context,IHttpContextAccesso
         return ticket ??  throw new CustomException("Ticket not found!", HttpStatusCode.NotFound);
     }
 
-    private  async Task<UserDto> GetCurrentUser()
-    {
-        //----> Get the HTTP context.
-        var httpContext = httpContextAccessor.HttpContext;
-        if (httpContext is null) throw new CustomException($"You need to be logged in first", HttpStatusCode.Unauthorized);
-        var email = httpContext.User.Identity?.Name;
-        if (email is null) throw new CustomException("You must login!", HttpStatusCode.Unauthorized);
-        var user = await userRepo.GetCurrentUserByEmail(email);
-        return user;
-
-    }
+    
 }

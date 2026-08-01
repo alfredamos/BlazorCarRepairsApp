@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlazorCarRepairsApp.Repositories;
 
-public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager) : IUserRepo
+public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IHttpContextAccessor httpContextAccessor) : IUserRepo
 {
     public async Task<UserDto> ChangeUserRole(string email)
     {
@@ -96,15 +96,18 @@ public class UserRepo(UserManager<ApplicationUser> userManager, RoleManager<Appl
 
     }
 
-    public async Task<UserDto> GetCurrentUserByEmail(string email)
+    public  async Task<UserDto> GetCurrentUser()
     {
-        //----> Fetch the user with the given email.
+        //----> Get the HTTP context.
+        var httpContext = httpContextAccessor.HttpContext;
+        if (httpContext is null) throw new CustomException($"You need to be logged in first", HttpStatusCode.Unauthorized);
+        var email = httpContext.User.Identity?.Name;
+        if (email is null) throw new CustomException("You must login!", HttpStatusCode.Unauthorized);
         var user = await GetUserByEmail(email);
-        
-        //----> Send back response.
         return UserMapper.MapUserToUserDto(user, Roles.Admin);
-    }
 
+    }
+    
     private async Task<ApplicationUser> GetUserByEmail(string email)
     {
         //----> Fetch the user by email
