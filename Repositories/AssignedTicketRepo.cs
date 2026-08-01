@@ -12,15 +12,19 @@ namespace BlazorCarRepairsApp.Repositories;
 
 public class AssignedTicketRepo(ApplicationDbContext context, IUserRepo userRepo) : IAssignedTicketRepo
 {
-    public async Task<ResponseMessage> CreateAssignedTicket(AssignedTicketCreateDto assignedTicketDto)
+    public async Task<ResponseMessage> CreateAssignedTicket(AssignedTicketCreateDto atkDto)
     {
+        //----> Check for duplicate assignment.
+        var ticket = await FetchOneAssignedTicket(atkDto.TechnicianId, atkDto.TicketId);
+        if (ticket != null) throw new CustomException("Duplicate assigned ticket!", HttpStatusCode.Conflict);
+        
         //----> Get the name of admin user as assignor
         var assignBy = (await userRepo.GetCurrentUser()).Name;
         if (assignBy is null) throw new CustomException("You must login!", HttpStatusCode.Unauthorized);
         
         //----> Map assigned-ticket-create-dto to Assigned-ticket.
         var assignedTicket =
-            AssignedTicketMapper.MapAssignedTicketCreateDtoToAssignedTicket(assignedTicketDto, assignBy);
+            AssignedTicketMapper.MapAssignedTicketCreateDtoToAssignedTicket(atkDto, assignBy);
         
         //----> Insert the assigned-ticket in db.
         await context.AssignedTickets.AddAsync(assignedTicket);
@@ -194,15 +198,19 @@ public class AssignedTicketRepo(ApplicationDbContext context, IUserRepo userRepo
     private async Task<AssignedTicket> GetOneAssignedTicket(Guid technicianId, Guid ticketId)
     {
         //----> Fetch the assigned ticket with the giving ids.
-        var ticket = await context.AssignedTickets
-            .Include(tk => tk.Technician.User)
-            .Include(tk => tk.Ticket.Customer.User)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(tk => tk.TechnicianId == technicianId && tk.TicketId == ticketId);
+        var ticket = await FetchOneAssignedTicket(technicianId, ticketId);
         
         //----> Send back response.
         return ticket ??  throw new CustomException("Ticket not found!", HttpStatusCode.NotFound);
     }
 
-    
+    private async Task<AssignedTicket?> FetchOneAssignedTicket(Guid technicianId, Guid ticketId)
+    {
+        //----> Fetch assigned-ticket with giving ids.
+        return await context.AssignedTickets
+            .Include(tk => tk.Technician.User)
+            .Include(tk => tk.Ticket.Customer.User)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(tk => tk.TechnicianId == technicianId && tk.TicketId == ticketId);
+    }
 }
