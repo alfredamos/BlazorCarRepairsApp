@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using BlazorCarRepairsApp.Contracts;
 using BlazorCarRepairsApp.Models;
 using BlazorCarRepairsApp.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ public class CustomerOwnerOrAdminAttribute(string routeParameter = "customerId")
         //----> Check for authentication.
         if (user.Identity is { IsAuthenticated: false })
         {
-            context.Result = new UnauthorizedResult();
+            context.Result = new UnauthorizedObjectResult("Invalid credentials");
             return;
         }
         
@@ -28,18 +29,17 @@ public class CustomerOwnerOrAdminAttribute(string routeParameter = "customerId")
         }
         
         //----> Retrieve the route-parameter.
-        var value = context.RouteData.Values[routeParameter]?.ToString();
+        var resourceOwnerId = context.RouteData.Values[routeParameter]?.ToString();
         
-        //----> Check for null.
-        if (string.IsNullOrWhiteSpace(value))
+        if (!Guid.TryParse(resourceOwnerId, out var idOfCustomer))
         {
-            context.Result = new BadRequestObjectResult("Invalid route parameter");
+            context.Result = new BadRequestObjectResult($"Missing required route parameter: {routeParameter}");
             return;
         }
         
         //----> Get the customer object.
-        var customer = context.HttpContext.RequestServices.GetRequiredService<Customer>();
-        var userIdFromCustomer = customer.UserId;
+        var customerRepo = context.HttpContext.RequestServices.GetRequiredService<ICustomerRepo>();
+        var userIdFromCustomer = (customerRepo.GetCustomerById(idOfCustomer).Result).UserId;
 
         //----> Get user-id from claim-types.
         var currentUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
