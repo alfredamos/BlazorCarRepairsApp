@@ -1,58 +1,94 @@
-﻿@inject NavigationManager NavManager
-@implements IDisposable
+﻿@using System.Net 
+@using System.Security.Claims 
+@using BlazorCarRepairsApp.Exceptions 
+@implements IDisposable 
+@inject NavigationManager NavigationManager 
+@inject AuthenticationStateProvider AuthProvider 
+@inject IUserRepo UserRepo 
 
-<div class="dropdown">
+<div class="dropdown"> 
     <button class="btn btn-link link-secondary dropdown-toggle text-decoration-none" 
             type="button" 
             @onclick="ToggleDropdown" 
-            aria-expanded="@_isOpen.ToString().ToLower()">
-        Settings
-    </button>
-    
-    <ul class="dropdown-menu dropdown-menu-end text-center @(_isOpen ? "show" : "")" style="min-width: 160px; overflow: hidden;">
-        <li class="w-100">
-            <NavLink class="dropdown-item text-decoration-none mx-auto" href="account/manage" Match="NavLinkMatch.All">Profile</NavLink>
-        </li>
-        <li><hr class="dropdown-divider"></li>
-        <li class="w-100">
-            <NavLink class="dropdown-item text-decoration-none mx-auto" href="" Match="NavLinkMatch.All">Home</NavLink>
-        </li>
-        <li><hr class="dropdown-divider"></li>
-        <li class="w-100">
-            <button type="button" class="dropdown-item" @onclick="HandleLogout">Logout</button>
-        </li>
-    </ul>
-</div>
+            aria-expanded="@_isOpen.ToString().ToLower()"> 
+        Settings 
+    </button> 
+    <ul class="dropdown-menu dropdown-menu-end text-center @(_isOpen ? "show" : "")" 
+        style="min-width: 160px; overflow: hidden;"> 
+        <li class="w-100"> 
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="account/manage" Match="NavLinkMatch.All">Profile</NavLink> 
+        </li> 
+        <li><hr class="dropdown-divider"></li> 
+        <li class="w-100"> 
+            <NavLink class="dropdown-item text-decoration-none mx-auto" href="" Match="NavLinkMatch.All">Home</NavLink> 
+        </li> 
+        <li><hr class="dropdown-divider"></li> 
+        <li class="w-100"> 
+            <button type="button" class="dropdown-item" @onclick="GetTickets">Tickets</button> 
+        </li> 
+    </ul> 
+</div> 
 
-@code {
-    private bool _isOpen = false;
+@code { 
+    private bool _isOpen = false; 
 
-    protected override void OnInitialized()
-    {
-        // Hook into the routing engine to listen for page changes
-        NavManager.LocationChanged += OnLocationChanged;
-    }
+    protected override void OnInitialized() 
+    { 
+        // Use the consistent NavigationManager instance
+        NavigationManager.LocationChanged += OnLocationChanged; 
+    } 
 
-    private void ToggleDropdown()
-    {
-        _isOpen = !_isOpen;
-    }
+    private void ToggleDropdown() 
+    { 
+        _isOpen = !_isOpen; 
+    } 
 
-    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
-    {
-        // Close the menu when navigating and force Blazor to render the update
-        _isOpen = false;
-        StateHasChanged();
-    }
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) 
+    { 
+        _isOpen = false; 
+        
+        // InvokeAsync prevents NullReferenceExceptions if event triggers outside the UI thread
+        InvokeAsync(StateHasChanged); 
+    } 
 
-    private void HandleLogout()
-    {
-        _isOpen = false;
-    }
+    private async Task GetTickets() 
+    { 
+        // 1. Safely check the authentication state
+        var auth = await AuthProvider.GetAuthenticationStateAsync(); 
+        var user = auth.User; 
 
-    public void Dispose()
-    {
-        // Unsubscribe from the event safely to avoid memory leaks
-        NavManager.LocationChanged -= OnLocationChanged;
-    }
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            throw new CustomException("User is not authenticated", HttpStatusCode.Unauthorized);
+        }
+
+        // 2. Safe navigation when pulling claims
+        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier || c.Type.Contains("nameidentifier"))?.Value; 
+
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var idOfUser)) 
+        { 
+            throw new CustomException("Invalid user identification credentials", HttpStatusCode.Unauthorized); 
+        } 
+
+        // 3. Fetch user records safely
+        var userObj = await UserRepo.GetUserById(idOfUser); 
+        if (userObj == null) 
+        { 
+            throw new CustomException("User record not found in the system", HttpStatusCode.NotFound); 
+        } 
+
+        // 4. Update component state BEFORE navigation 
+        _isOpen = false; 
+
+        // 5. Route dynamically based on user type
+        NavigationManager.NavigateTo(userObj.UserType == UserType.Customer 
+            ? $"/tickets/by-user-id/{idOfUser}" 
+            : $"/assign-tickets/by-user-id/{idOfUser}"); 
+    } 
+
+    public void Dispose() 
+    { 
+        // Use the correct instance name to prevent lingering memory leaks
+        NavigationManager.LocationChanged -= OnLocationChanged; 
+    } 
 }
