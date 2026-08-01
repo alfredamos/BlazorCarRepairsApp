@@ -96,58 +96,96 @@ public class AssignedTicketRepo(ApplicationDbContext context, IUserRepo userRepo
         };
     }
 
-    public async Task<List<AssignedTicketResponse>> GetAllAssignedTickets()
+        public async Task<List<AssignedTicketResponse>> GetAllAssignedTickets(string? searchItem = "")
     {
-        //----> Fetch all assigned-tickets.
-        var assignedTickets = await context.AssignedTickets
-            .Include(tk => tk.Technician.User)
-            .Include(tk => tk.Ticket.Customer.User)
-            .AsNoTracking().ToListAsync();
-        
-        //----> Send back response.
+        // Normalize search term once
+        var search = searchItem?.Trim().ToLower() ?? string.Empty;
+
+        // Set up query with necessary includes
+        var query = context.AssignedTickets
+            .Include(atk => atk.Ticket)
+                .ThenInclude(t => t.Customer)
+                    .ThenInclude(c => c.User)
+            .Include(atk => atk.Technician)
+                .ThenInclude(tech => tech.User)
+            .AsQueryable();
+
+        // Apply search filter if searchItem is provided
+        if (!string.IsNullOrEmpty(search))
+        {
+            query = query.Where(atk =>
+                // Ticket properties
+                (!string.IsNullOrEmpty(atk.Ticket.Title) && atk.Ticket.Title.ToLower().Contains(search)) ||
+                (!string.IsNullOrEmpty(atk.Ticket.Description) && atk.Ticket.Description.ToLower().Contains(search)) ||
+                
+                // Customer User properties
+                (atk.Ticket.Customer.User != null && (
+                    (!string.IsNullOrEmpty(atk.Ticket.Customer.User.Name) && atk.Ticket.Customer.User.Name.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(atk.Ticket.Customer.User.Email) && atk.Ticket.Customer.User.Email.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(atk.Ticket.Customer.User.PhoneNumber) && atk.Ticket.Customer.User.PhoneNumber.Contains(search)) ||
+                    (!string.IsNullOrEmpty(atk.Ticket.Customer.User.Gender) && atk.Ticket.Customer.User.Gender.ToLower().Contains(search))
+                )) ||
+                
+                // Technician properties
+                (!string.IsNullOrEmpty(atk.Technician.Specialty) && atk.Technician.Specialty.ToLower().Contains(search)) ||
+                
+                // Technician User properties
+                (atk.Technician.User != null && (
+                    (!string.IsNullOrEmpty(atk.Technician.User.Name) && atk.Technician.User.Name.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(atk.Technician.User.Email) && atk.Technician.User.Email.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(atk.Technician.User.PhoneNumber) && atk.Technician.User.PhoneNumber.Contains(search)) ||
+                    (!string.IsNullOrEmpty(atk.Technician.User.Gender) && atk.Technician.User.Gender.ToLower().Contains(search))
+                ))
+            );
+        }
+
+        // Execute query and map to response model (handles both filtered and unfiltered cases)
+        var assignedTickets = await query.ToListAsync();
+
         return [.. assignedTickets.Select(AssignedTicketMapper.MapToAssignedTicketResponse)];
     }
 
+
     public async Task<AssignedTicketResponse> GetAssignedTicketById(Guid technicianId, Guid ticketId)
     {
-        //----> Get assigned-tickets by ticket-id.
-       var assignedTicket = await GetOneAssignedTicket(technicianId, ticketId);
+       //----> Fetch the assigned ticket with giving ids.
+       var ticket = await GetOneAssignedTicket(technicianId, ticketId);
        
        //----> Send back response.
-       return AssignedTicketMapper.MapToAssignedTicketResponse(assignedTicket);
+       return AssignedTicketMapper.MapToAssignedTicketResponse(ticket);
     }
 
-    public async Task<List<AssignedTicketResponse>> GetAssignedTicketsByTechnicianId(Guid technicianId)
+    public async Task<List<AssignedTicketResponse>> GetAssignedTicketsByTechnicianId(Guid technicianId, string? searchItem = "")
     {
         //----> Get assigned-tickets by tech-id.
-        var tickets = (await GetAllAssignedTickets()).Where(tk => tk.TechnicianId.Equals(technicianId)).ToList();
+        var tickets = (await GetAllAssignedTickets(searchItem)).Where(tk => tk.TechnicianId.Equals(technicianId)).ToList();
         
         //----> Send back response
         return tickets;
     }
 
-    public async Task<List<AssignedTicketResponse>> GetAssignedTicketsByTicketId(Guid ticketId)
+    public async Task<List<AssignedTicketResponse>> GetAssignedTicketsByTicketId(Guid ticketId, string? searchItem = "")
     {
         //----> Get assigned-tickets by ticket-id.
-        var tickets = (await GetAllAssignedTickets()).Where(tk => tk.TicketId.Equals(ticketId)).ToList();
+        var tickets = (await GetAllAssignedTickets(searchItem)).Where(tk => tk.TicketId.Equals(ticketId)).ToList();
         
         //----> Send back response
         return tickets;
     }
 
-    public async Task<List<AssignedTicketResponse>> GetCompletedAssignedTickets()
+    public async Task<List<AssignedTicketResponse>> GetCompletedAssignedTickets(string? searchItem = "")
     {
         //----> Fetch all completed tickets.
-        var tickets = (await GetAllAssignedTickets()).Where(tk => tk.Completed).ToList();
+        var tickets = (await GetAllAssignedTickets(searchItem)).Where(tk => tk.Completed).ToList();
         
         //----> Send back response.
         return tickets;
     }
 
-    public async Task<List<AssignedTicketResponse>> GetUncompletedAssignedTickets()
+    public async Task<List<AssignedTicketResponse>> GetUncompletedAssignedTickets(string? searchItem = "")
     {
         //----> Fetch all uncompleted tickets.
-        var tickets = (await GetAllAssignedTickets()).Where(tk => !tk.Completed).ToList();
+        var tickets = (await GetAllAssignedTickets(searchItem)).Where(tk => !tk.Completed).ToList();
         
         //----> Send back response.
         return tickets;

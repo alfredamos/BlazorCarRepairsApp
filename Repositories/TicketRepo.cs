@@ -79,28 +79,34 @@ public class TicketRepo(ApplicationDbContext context) : ITicketRepo
         return TicketMapper.MapToTicketResponse(ticket);
     }
 
-    public async Task<List<TicketResponse>> GetTickets(string? searchItem = "")
+    public async Task<List<TicketResponse>> GetTickets(string? searchItem)
     {
-        var query = context.Tickets.Include(tk => tk.Customer.User).AsNoTracking();
+        var query = context.Tickets
+            .Include(tk => tk.Customer)
+            .ThenInclude(cst => cst.User)
+            .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(searchItem))
         {
             var search = searchItem.Trim().ToLower();
-        
+
             query = query.Where(cst => 
-                cst.Customer.User != null && (cst.Title.ToLower().Contains(search) ||
-                                              cst.Description.ToLower().Contains(search) ||
-                                              (!string.IsNullOrEmpty(cst.Customer.User.Name) && cst.Customer.User.Name.Contains(search)) ||
-                                              (!string.IsNullOrEmpty(cst.Customer.User.Email) && cst.Customer.User.Email.ToLower().Contains(search)) ||
-                                              (!string.IsNullOrEmpty(cst.Customer.User.PhoneNumber) && cst.Customer.User.PhoneNumber.Contains(search)) ||
-                                              (!string.IsNullOrEmpty(cst.Customer.User.Gender) && cst.Customer.User.Gender.Contains(search)))
+                (cst.Title.ToLower().Contains(search)) ||
+                (cst.Description.ToLower().Contains(search)) ||
+                (cst.Customer.User != null && (
+                    (cst.Customer.User.Name.ToLower().Contains(search)) ||
+                    (cst.Customer.User.Email != null && cst.Customer.User.Email.ToLower().Contains(search)) ||
+                    (cst.Customer.User.PhoneNumber != null && cst.Customer.User.PhoneNumber.Contains(search)) ||
+                    (cst.Customer.User.Gender.ToLower().Contains(search))
+                ))
             );
         }
 
         var tickets = await query.ToListAsync();
-
+    
         return [.. tickets.Select(TicketMapper.MapToTicketResponse)];
     }
+
 
     public async Task<List<TicketResponse>> GetTicketsByCustomerId(Guid customerId, string? searchItem = "")
     {
