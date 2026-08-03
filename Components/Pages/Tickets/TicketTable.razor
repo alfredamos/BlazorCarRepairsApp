@@ -1,12 +1,9 @@
 ﻿
-<!-- Responsive wrapper container -->
 <div class="card-header mt-2 mb-3">
-    <h3 class="text-lg-center mb-2">List of Tickets</h3>
-    <div class="d-flex align-content-center gap-2">
-        <input @bind-value="SearchItem" class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search"/>
-        <button class=" btn btn-outline-primary bi-search" @onclick="GetSearchItem"></button>
-    </div>
+    <h3 class="text-lg-center mb-2">List of Users</h3>
+    <SearchBar @bind-Value:get="Value" @bind-Value:set="HandleSearchBarChanged"></SearchBar>
 </div>
+<!-- Responsive wrapper container -->
 <div class="table-responsive">
     <table class="table table-striped align-middle"> 
         <thead> 
@@ -52,26 +49,16 @@
 
 @code {
     [Parameter] public List<TicketResponse> Tickets { get; set; } = [];
+    [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<Guid> OnDetailTicket { get; set; }
     [Parameter] public EventCallback<Guid> OnConfirmDelete { get; set; }
-    [Parameter] public EventCallback<string> OnGetSearchItem { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public EventCallback OnCreateNewTicket { get; set; }
     [Parameter]
     public EventCallback<Guid> OnEditTicket {get; set; }
 
     private bool _isModalOpen;
     private Guid _ticketIdToDelete;
-    private string? _searchText;
-    
-    private string? SearchItem
-    {
-        get;
-        set
-        {
-            field = value;
-            _searchText = !string.IsNullOrWhiteSpace(_searchText) ? value : "";
-        }
-    }
 
     private async Task DetailTicket(Guid id)
     {
@@ -97,11 +84,6 @@
         CloseModal(); // Reset state and close
     }
 
-    private async Task GetSearchItem()
-    {
-        await OnGetSearchItem.InvokeAsync(SearchItem);
-    }
-
     private async Task CreateNewTicket()
     {
         await OnCreateNewTicket.InvokeAsync();
@@ -111,5 +93,10 @@
     {
         await OnEditTicket.InvokeAsync(id);
     }
-    
+
+    private async Task HandleSearchBarChanged(string newValue)
+    {
+       await ValueChanged.InvokeAsync(newValue);
+    }
+
 }

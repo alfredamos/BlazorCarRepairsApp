@@ -22,13 +22,15 @@ else
         OnChangeUserRole="ChangeUserRole"
         OnConfirmDelete="DeleteUser"
         OnDetailUser="DetailUser"
-        OnGetSearchItem="GetSearchItem"
+        @bind-Value="_searchItem"
+        @bind-Value:after="GetSearchItem"
         OnGetUserTickets="GetUserTickets"
     />
 }
 
 @code {
     private List<UserDto>? _users;
+    private string _searchItem = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,11 +66,11 @@ else
         StateHasChanged();
     }
 
-    private async Task GetSearchItem(string query)
+    private async Task GetSearchItem()
     {
-        Console.WriteLine($"The search query : {query}");
+        Console.WriteLine($"The search query : {_searchItem}");
         
-        _users = await UserRepo.GetAllUsers(query);
+        _users = await UserRepo.GetAllUsers(_searchItem);
         StateHasChanged();
     }
 

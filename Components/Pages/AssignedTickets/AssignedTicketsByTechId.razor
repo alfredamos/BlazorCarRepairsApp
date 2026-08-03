@@ -29,13 +29,15 @@ else
         OnCreateNewTicket="CreateNewTicket"
         OnDetailTicket="DetailTicket"
         OnEditTicket="UpdateTicket"
-        OnGetSearchItem="GetSearchItem"
+        @bind-Value="_searchItem"
+        @bind-Value:after="GetSearchItem"
     />
 }
 
 @code {
     [Parameter]
     public Guid TechId { get; set; }
+    private string _searchItem = string.Empty;
     
     private List<AssignedTicketResponse>? _tickets;
 
@@ -73,11 +75,11 @@ else
         StateHasChanged();
     }
     
-    private async Task GetSearchItem(string query)
+    private async Task GetSearchItem()
     {
-        Console.WriteLine($"The search query : {query}");
+        Console.WriteLine($"The search query : {_searchItem}");
         
-        _tickets = await TicketRepo.GetAssignedTicketsByTechnicianId(TechId, query);
+        _tickets = await TicketRepo.GetAssignedTicketsByTechnicianId(TechId, _searchItem);
         StateHasChanged();
     }
 

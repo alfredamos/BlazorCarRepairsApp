@@ -1,0 +1,24 @@
+﻿<div class="d-flex align-content-center gap-2">
+    <input @bind="Value" @bind:event="oninput" @bind:after="OnInputProcessed" class="form-control rounded-pill bi-search" type="text" placeholder="Search..." aria-label="Search"/>
+</div>
+
+@{
+    return;
+
+   
+}
+
+@code {
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+    
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+
+    private async Task OnInputProcessed()
+    {
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+}

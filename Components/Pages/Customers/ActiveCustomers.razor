@@ -28,13 +28,15 @@ else
         OnCreateNewCustomer="CreateNewCustomer"
         OnDetailCustomer="DetailCustomer"
         OnEditCustomer="UpdateCustomer"
-        OnGetSearchItem="GetSearchItem"
+        @bind-Value="_searchItem"
+        @bind-Value:after="GetSearchItem"
         OnGetCustomerTickets="GetCustomerTickets"
     />
 }
 
 @code {
     private List<CustomerResponse>? _customers;
+    private string _searchItem = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,11 +73,11 @@ else
         StateHasChanged();
     }
 
-    private async Task GetSearchItem(string query)
+    private async Task GetSearchItem()
     {
-        Console.WriteLine($"The search query : {query}");
+        Console.WriteLine($"The search query : {_searchItem}");
         
-        _customers = await CustomerRepo.GetActiveCustomers(query);
+        _customers = await CustomerRepo.GetActiveCustomers(_searchItem);
         StateHasChanged();
     }
 
