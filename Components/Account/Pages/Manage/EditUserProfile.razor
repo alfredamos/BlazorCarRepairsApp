@@ -86,32 +86,35 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //----> Get the auth-state.
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        
-        //----> Get the current user email
-        var email = authState.User.FindFirstValue(ClaimTypes.Email);
-        
-        //----> Get the current user.
-        User = await UserManager.FindByEmailAsync(email!);
-        
-        if (User is null)
+        if (RendererInfo.IsInteractive)
         {
-            throw new CustomException("You must login in!", HttpStatusCode.Unauthorized);
+            //----> Get the auth-state.
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+            //----> Get the current user email
+            var email = authState.User.FindFirstValue(ClaimTypes.Email);
+
+            //----> Get the current user.
+            User = await UserManager.FindByEmailAsync(email!);
+
+            if (User is null)
+            {
+                throw new CustomException("You must login in!", HttpStatusCode.Unauthorized);
+            }
+
+            //----> Populate the input model.
+            Input ??= new InputModel
+            {
+                Email = User.Email!,
+                Name = User.Name,
+                Birthdate = User.Birthdate,
+                Gender = User.Gender,
+                Password = "",
+                Phone = User.PhoneNumber!,
+                ImagePath = User.ImagePath!,
+            };
         }
 
-        //----> Populate the input model.
-        Input ??= new InputModel
-        {
-            Email = User.Email!,
-            Name = User.Name,
-            Birthdate = User.Birthdate,
-            Gender = User.Gender,
-            Password = "",
-            Phone = User.PhoneNumber!,
-            ImagePath = User.ImagePath!,
-        };
-        
     }
 
     public async Task ChangeUserProfile()
