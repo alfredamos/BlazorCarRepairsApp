@@ -52,7 +52,7 @@ public class TicketRepo(ApplicationDbContext context) : ITicketRepo
     public async Task<ResponseMessage> EditTicketById(Guid id, TicketEditDto ticketDto)
     {
         //----> Check for invalid id.
-        if (ticketDto.Id.Equals(id))
+        if (!ticketDto.Id.Equals(id))
         {
             throw new CustomException("Invalid ticket id!", HttpStatusCode.BadRequest);
         }
