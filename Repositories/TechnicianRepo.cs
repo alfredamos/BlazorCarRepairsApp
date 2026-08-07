@@ -50,6 +50,12 @@ public class TechnicianRepo(ApplicationDbContext context) : ITechnicianRepo
 
     public async Task<ResponseMessage> EditTechById(Guid id, TechEditDto techDto)
     {
+        //----> Check for invalid id.
+        if (!techDto.Id.Equals(id))
+        {
+            throw new CustomException("Invalid technician id!", HttpStatusCode.BadRequest); 
+        }
+        
         //----> Check for existence of technician.
         var tech = await GetOneTechnician(id);
         
