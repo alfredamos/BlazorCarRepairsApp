@@ -77,12 +77,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        User ??= await UserRepo.GetUserById(UserId);
-        if (User != null)
+        if (RendererInfo.IsInteractive)
         {
+            User ??= await UserRepo.GetUserById(UserId);
+            if (User != null)
+            {
+                _userIdToDelete = User.Id;
 
-            _userIdToDelete = User.Id;
-
+            }
         }
     }
 

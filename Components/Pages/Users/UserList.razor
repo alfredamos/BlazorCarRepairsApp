@@ -34,15 +34,18 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        if (RendererInfo.IsInteractive)
         {
-            _users ??= await UserRepo.GetAllUsers();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Database Error: {ex.Message}");
-            
-            _users = []; // Fallback to empty list to stop the loading loop
+            try
+            {
+                _users ??= await UserRepo.GetAllUsers();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Error: {ex.Message}");
+
+                _users = []; // Fallback to empty list to stop the loading loop
+            }
         }
     }
 
