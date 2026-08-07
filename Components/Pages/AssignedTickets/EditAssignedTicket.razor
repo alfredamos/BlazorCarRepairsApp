@@ -52,14 +52,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _ticketResponse ??= await TicketRepo.GetAssignedTicketById(TechId, TicketId);
-        Ticket ??= new AssignedTicketEditDto
+        if (RendererInfo.IsInteractive)
         {
-            TechnicianId= _ticketResponse.TechnicianId,
-            TicketId = _ticketResponse.TicketId,
-            Completed = _ticketResponse.Completed,
-            Status = _ticketResponse.Status,
-        };
+            _ticketResponse ??= await TicketRepo.GetAssignedTicketById(TechId, TicketId);
+            Ticket ??= new AssignedTicketEditDto
+            {
+                TechnicianId = _ticketResponse.TechnicianId,
+                TicketId = _ticketResponse.TicketId,
+                Completed = _ticketResponse.Completed,
+                Status = _ticketResponse.Status,
+            };
+        }
 
     }
 

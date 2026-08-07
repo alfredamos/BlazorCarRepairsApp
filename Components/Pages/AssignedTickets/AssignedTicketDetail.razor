@@ -87,7 +87,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _ticket ??= await TicketRepo.GetAssignedTicketById(TechId, TicketId);
+        if (RendererInfo.IsInteractive)
+        {
+            _ticket ??= await TicketRepo.GetAssignedTicketById(TechId, TicketId);
+        }
+        
     }
 
     private void BackToList()

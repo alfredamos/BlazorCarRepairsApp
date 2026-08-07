@@ -67,11 +67,12 @@ else if(_technicians is not null && _tickets is not null)
 
     protected override async Task OnInitializedAsync()
     {
-        
-        _technicians ??= await TechRepo.GetAllTechs();
-        _tickets ??= await TicketRepo.GetTickets();
-        Ticket ??= new();
-        
+
+        if (RendererInfo.IsInteractive)
+        {
+            _technicians ??= await TechRepo.GetAllTechs();
+            _tickets ??= await TicketRepo.GetTickets();
+        }
     }
 
     private async Task CreateNewTicketForm()

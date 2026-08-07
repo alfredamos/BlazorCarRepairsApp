@@ -43,16 +43,18 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        if (RendererInfo.IsInteractive)
         {
-            
-            _tickets ??= await TicketRepo.GetAssignedTicketsByTechnicianId(TechId);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Database Error: {ex.Message}");
-            
-            _tickets = []; // Fallback to empty list to stop the loading loop
+            try
+            {
+                _tickets ??= await TicketRepo.GetAssignedTicketsByTechnicianId(TechId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Error: {ex.Message}");
+
+                _tickets = []; // Fallback to empty list to stop the loading loop
+            }
         }
     }
 
@@ -61,6 +63,7 @@ else
         await TicketRepo.ChangeAssignedTicketStatus(id.techId, id.ticketId);
         _tickets = await TicketRepo.GetAssignedTicketsByTechnicianId(TechId);
         StateHasChanged();
+        
     }
 
     private void DetailTicket((Guid techId, Guid ticketId) id)
@@ -70,7 +73,8 @@ else
 
     private async Task DeleteTicket((Guid techId, Guid ticketId) id)
     {
-        await TicketRepo.DeleteAssignedTicketById(id.techId,  id.ticketId);
+       
+        await TicketRepo.DeleteAssignedTicketById(id.techId, id.ticketId);
         _tickets = await TicketRepo.GetAssignedTicketsByTechnicianId(TechId);
         StateHasChanged();
     }
