@@ -40,16 +40,18 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        if (RendererInfo.IsInteractive)
         {
-            
-            _customers ??= await CustomerRepo.GetActiveCustomers();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Database Error: {ex.Message}");
-            
-            _customers = []; // Fallback to empty list to stop the loading loop
+            try
+            {
+                _customers ??= await CustomerRepo.GetActiveCustomers();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Error: {ex.Message}");
+
+                _customers = []; // Fallback to empty list to stop the loading loop
+            }
         }
     }
 

@@ -62,16 +62,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _users ??= await UserRepo.GetAllUsers("Customer");
-        Customer ??= new();
-        
+        if (RendererInfo.IsInteractive)
+            _users ??= await UserRepo.GetAllUsers("Customer");
     }
-
+    
     private async Task CreateNewCustomerForm()
     {
         await CustomerRepo.CreateCustomer(customer: Customer);
         NavigationManager.NavigateTo("customers");
         
     }
+ 
+
+
+   
 }
 

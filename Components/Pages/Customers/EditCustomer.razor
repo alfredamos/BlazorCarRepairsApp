@@ -53,16 +53,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _customerResponse ??=  await CustomerRepo.GetCustomerById(CustomerId);
-        Customer ??= new CustomerEditDto
+        if (RendererInfo.IsInteractive)
         {
-            Id = _customerResponse.Id,
-            Address = _customerResponse?.Address,
-            Active = _customerResponse!.Active,
-            Notes = _customerResponse?.Notes,
-            UserId = _customerResponse?.UserId
-        };
-        
+            _customerResponse ??= await CustomerRepo.GetCustomerById(CustomerId);
+            Customer ??= new CustomerEditDto
+            {
+                Id = _customerResponse.Id,
+                Address = _customerResponse?.Address,
+                Active = _customerResponse!.Active,
+                Notes = _customerResponse?.Notes,
+                UserId = _customerResponse?.UserId
+            };
+        }
+
     }
 
     private async Task EditCustomerForm()

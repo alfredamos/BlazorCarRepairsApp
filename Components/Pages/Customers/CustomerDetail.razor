@@ -87,12 +87,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Customer ??= await CustomerRepo.GetCustomerById(CustomerId);
-        if (Customer != null)
+        if (RendererInfo.IsInteractive)
         {
+            Customer ??= await CustomerRepo.GetCustomerById(CustomerId);
+            if (Customer != null)
+            {
+                _customerIdToDelete = Customer.Id;
 
-            _customerIdToDelete = Customer.Id;
-
+            }
         }
     }
 
