@@ -7,8 +7,6 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using BlazorCarRepairsApp.Exceptions
-@using BlazorCarRepairsApp.Models
-@using BlazorCarRepairsApp.Utils
 
 @inject UserManager<ApplicationUser> UserManager
 @inject RoleManager<ApplicationRole> RoleManager
@@ -99,7 +97,11 @@
 
     protected override void OnInitialized()
     {
-        Input ??= new();
+        if (RendererInfo.IsInteractive)
+        {
+            Input = new InputModel();
+        }
+        
     }
 
     public async Task RegisterUser(EditContext editContext)
@@ -150,7 +152,7 @@
         {
             RedirectManager.RedirectTo(
                 "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+                new Dictionary<string, object?> { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
         }
         else
         {
