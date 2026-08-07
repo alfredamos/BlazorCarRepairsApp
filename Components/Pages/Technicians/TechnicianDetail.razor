@@ -78,12 +78,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Technician ??= await TechnicianRepo.GetTechById(Id);
-        if (Technician != null)
+        if (RendererInfo.IsInteractive)
         {
+            Technician ??= await TechnicianRepo.GetTechById(Id);
+            if (Technician != null)
+            {
+                _technicianIdToDelete = Technician.Id;
 
-            _technicianIdToDelete = Technician.Id;
-
+            }
         }
     }
 

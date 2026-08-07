@@ -57,25 +57,28 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        if (RendererInfo.IsInteractive)
         {
-            if (Technician is null)
+            try
             {
-                _techResponse = await TechnicianRepo.GetTechById(Id);
-                if (_techResponse is not null)
+                if (Technician is null)
                 {
-                    Technician = new TechEditDto
+                    _techResponse = await TechnicianRepo.GetTechById(Id);
+                    if (_techResponse is not null)
                     {
-                        Id = _techResponse.Id,
-                        Specialty = _techResponse.Specialty,
-                        UserId = _techResponse.UserId
-                    };
+                        Technician = new TechEditDto
+                        {
+                            Id = _techResponse.Id,
+                            Specialty = _techResponse.Specialty,
+                            UserId = _techResponse.UserId
+                        };
+                    }
                 }
             }
-        }
-        finally
-        {
-            _isLoading = false;
+            finally
+            {
+                _isLoading = false;
+            }
         }
     }
 

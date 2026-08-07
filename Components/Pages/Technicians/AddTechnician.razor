@@ -58,9 +58,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _users ??= await UserRepo.GetAllUsers("Technician");
-        Technician ??= new();
-        
+        if (RendererInfo.IsInteractive)
+        {
+            _users ??= await UserRepo.GetAllUsers("Technician");
+        }
+
     }
 
     private async Task CreateNewTechnicianForm()
