@@ -89,12 +89,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Ticket ??= await TicketRepo.GetTicketById(Id);
-        if (Ticket != null)
+        if (RendererInfo.IsInteractive)
         {
+            Ticket ??= await TicketRepo.GetTicketById(Id);
+            if (Ticket != null)
+            {
+                _ticketIdToDelete = Ticket.Id;
 
-            _ticketIdToDelete = Ticket.Id;
-
+            }
         }
     }
 

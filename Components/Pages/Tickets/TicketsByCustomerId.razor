@@ -40,16 +40,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        if (RendererInfo.IsInteractive)
         {
-            
-            _tickets ??= await TicketRepo.GetTicketsByCustomerId(CustomerId);;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Database Error: {ex.Message}");
-            
-            _tickets = []; // Fallback to empty list to stop the loading loop
+            try
+            {
+                _tickets ??= await TicketRepo.GetTicketsByCustomerId(CustomerId);
+                ;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Error: {ex.Message}");
+
+                _tickets = []; // Fallback to empty list to stop the loading loop
+            }
         }
     }
 

@@ -62,9 +62,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _customers ??= await CustomerRepo.GetCustomers();
-        Ticket ??= new();
-        
+        if (RendererInfo.IsInteractive)
+            _customers ??= await CustomerRepo.GetCustomers();
     }
 
     private async Task CreateNewTicketForm()

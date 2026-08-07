@@ -51,15 +51,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _ticketResponse ??= await TicketRepo.GetTicketById(Id);
-        Ticket ??= new TicketEditDto
+        if (RendererInfo.IsInteractive)
         {
-            Id = _ticketResponse.Id,
-            Title = _ticketResponse.Title,
-            Description = _ticketResponse.Description,
-            CustomerId = _ticketResponse.CustomerId,
-        };
-
+            _ticketResponse ??= await TicketRepo.GetTicketById(Id);
+            Ticket ??= new TicketEditDto
+            {
+                Id = _ticketResponse.Id,
+                Title = _ticketResponse.Title,
+                Description = _ticketResponse.Description,
+                CustomerId = _ticketResponse.CustomerId,
+            };
+        }
     }
 
     private async Task EditTicketForm()
