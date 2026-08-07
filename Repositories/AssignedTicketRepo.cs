@@ -78,6 +78,12 @@ public class AssignedTicketRepo(ApplicationDbContext context, IUserRepo userRepo
 
     public async Task<ResponseMessage> EditAssignedTicketById(Guid technicianId, Guid ticketId, AssignedTicketEditDto tkRequest)
     {
+        //----> Check for ids match.
+        if (!technicianId.Equals(tkRequest.TechnicianId) && !ticketId.Equals(tkRequest.TicketId))
+        {
+            throw new CustomException("Invalid assigned ticket ids", HttpStatusCode.BadRequest);
+        }
+        
         //----> Get the assigned-ticket with the giving ids.
         var assignedTicket = await GetOneAssignedTicket(technicianId, ticketId);
         
