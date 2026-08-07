@@ -216,7 +216,6 @@ public class AssignedTicketRepo(ApplicationDbContext context, IUserRepo userRepo
         return await context.AssignedTickets
             .Include(tk => tk.Technician.User)
             .Include(tk => tk.Ticket.Customer.User)
-            .AsNoTracking()
             .FirstOrDefaultAsync(tk => tk.TechnicianId == technicianId && tk.TicketId == ticketId);
     }
 }
