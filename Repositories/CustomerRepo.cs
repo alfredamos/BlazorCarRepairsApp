@@ -167,7 +167,7 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
     private async Task<Customer> GetOneCustomer(Guid id)
     {
         //----> Fetch the customer with giving id.
-        var customer = await context.Customers.Include(cst => cst.User).AsNoTracking().FirstOrDefaultAsync(cst => cst.Id.Equals(id));
+        var customer = await context.Customers.Include(cst => cst.User).FirstOrDefaultAsync(cst => cst.Id.Equals(id));
         
         //----> Send back response.
         return customer ?? throw new CustomException("Customer not found", HttpStatusCode.NotFound);
