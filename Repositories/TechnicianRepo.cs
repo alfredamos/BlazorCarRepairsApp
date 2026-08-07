@@ -129,7 +129,7 @@ public class TechnicianRepo(ApplicationDbContext context) : ITechnicianRepo
     private async Task<Technician> GetOneTechnician(Guid id)
     {
         //----> Fetch the tech from db.
-        var tech = await context.Technicians.Include(tk => tk.User).AsNoTracking().FirstOrDefaultAsync(tk => tk.Id.Equals(id));
+        var tech = await context.Technicians.Include(tk => tk.User).FirstOrDefaultAsync(tk => tk.Id.Equals(id));
         
         //----> Check for null tech.
         return tech ?? throw new CustomException("Technician not found", HttpStatusCode.NotFound);
