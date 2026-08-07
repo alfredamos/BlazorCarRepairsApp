@@ -73,6 +73,12 @@ public class CustomerRepo(ApplicationDbContext context) : ICustomerRepo
 
     public async Task<ResponseMessage> EditCustomerById(Guid id, CustomerEditDto customerEditDto)
     {
+        //----> Check for id match.
+        if (!id.Equals(customerEditDto.Id))
+        {
+            throw new CustomException("Invalid customer id!", HttpStatusCode.BadRequest);
+        }
+        
         if (!id.Equals(customerEditDto.Id))
         {
             throw new CustomException("Invalid customer id", HttpStatusCode.BadRequest);
