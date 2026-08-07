@@ -1,0 +1,88 @@
+﻿@page "/technicians"
+@using BlazorCarRepairsApp.Dto.Technicians
+@inject ITechnicianRepo TechnicianRepo
+@inject NavigationManager NavigationManager
+
+@attribute [Authorize(Roles = Roles.Admin)]
+
+<PageTitle>Technicians</PageTitle>
+
+@if (_technicians is null)
+{
+    <p>Loading technicians...</p>
+}
+else if (!_technicians.Any())
+{
+    <div class="d-flex justify-content-between align-content-center mx-auto mb-5">
+        <p>No technicians found.</p>
+        <button type="button" class="btn btn-outline-secondary btn-lg" @onclick="CreateNewTechnician">Add New Technician</button>
+    </div>
+    
+}
+else
+{
+    <TechnicianTable 
+        Technicians="_technicians" 
+        OnConfirmDelete="DeleteTechnician"
+        OnCreateNewTechnician="CreateNewTechnician"
+        OnDetailTechnician="DetailTechnician"
+        OnEditTechnician="UpdateTechnician"
+        @bind-Value="_searchItem"
+        @bind-Value:after="GetSearchItem"
+        OnGetTechTickets="GetTechTickets"
+    />
+}
+
+@code {
+    private List<TechResponse>? _technicians;
+    private string _searchItem = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            
+            _technicians ??= await TechnicianRepo.GetAllTechs();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database Error: {ex.Message}");
+            
+            _technicians = []; // Fallback to empty list to stop the loading loop
+        }
+    }
+    
+    private void DetailTechnician(Guid id)
+    {
+        NavigationManager.NavigateTo($"/technicians/{id}");
+    }
+
+    private async Task DeleteTechnician(Guid id)
+    {
+        await TechnicianRepo.DeleteTechById(id);
+        _technicians = await TechnicianRepo.GetAllTechs();
+    }
+
+    private async Task GetSearchItem()
+    {
+        Console.WriteLine($"The search query : {_searchItem}");
+        
+        _technicians= await TechnicianRepo.GetAllTechs(_searchItem);
+    }
+
+    private void CreateNewTechnician()
+    {
+        NavigationManager.NavigateTo("technicians/add");
+    }
+
+    private void UpdateTechnician(Guid id)
+    {
+        NavigationManager.NavigateTo($"technicians/edit/{id}");
+    }
+
+    private void GetTechTickets(Guid techId)
+    {
+        NavigationManager.NavigateTo($"/assign-tickets/by-tech-id/{techId}");
+    }
+
+}

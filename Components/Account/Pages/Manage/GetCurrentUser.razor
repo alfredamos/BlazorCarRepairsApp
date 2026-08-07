@@ -1,5 +1,4 @@
 ﻿@page "/Account/Manage/GetCurrentUser"
-@using BlazorCarRepairsApp.Dto
 
 @rendermode  InteractiveServer
 
@@ -64,35 +63,38 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //----> Get the auth-state
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
-        //----> Get the current user email
-        var email = authState.User.FindFirstValue(ClaimTypes.Email);
-
-        //----> Get the current user.
-        var user = await UserManager.FindByEmailAsync(email!);
-
-        //----> Check for authenticated user.
-        if (user is null)
+        if (RendererInfo.IsInteractive)
         {
-            throw new CustomException("You must login in!", HttpStatusCode.Unauthorized);
+            //----> Get the auth-state
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+            //----> Get the current user email
+            var email = authState.User.FindFirstValue(ClaimTypes.Email);
+
+            //----> Get the current user.
+            var user = await UserManager.FindByEmailAsync(email!);
+
+            //----> Check for authenticated user.
+            if (user is null)
+            {
+                throw new CustomException("You must login in!", HttpStatusCode.Unauthorized);
+            }
+
+            //----> Get the user role.
+            var role = (await UserManager.GetRolesAsync(user))[0];
+
+            //----> Populate user-details.
+            UserDetail ??= new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Name = user.Name,
+                Role = role,
+                Gender = user.Gender,
+                Image = user.ImagePath,
+                Phone = user.PhoneNumber,
+            };
         }
-
-        //----> Get the user role.
-        var role = (await UserManager.GetRolesAsync(user))[0];
-
-        //----> Populate user-details.
-        UserDetail ??= new UserDto
-        {
-            Id = user.Id,
-            Email = user.Email,
-            Name = user.Name,
-            Role = role,
-            Gender = user.Gender,
-            Image = user.ImagePath,
-            Phone = user.PhoneNumber,
-        };
     }
 
     private void BackToMain()

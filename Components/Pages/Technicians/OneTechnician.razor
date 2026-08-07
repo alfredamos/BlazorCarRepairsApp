@@ -1,0 +1,59 @@
+﻿@using BlazorCarRepairsApp.Dto.Technicians
+<tr @key="Technician.Id"> 
+    <td>
+        <img src="@Technician.Image" alt="@Technician.Name" class="img-fluid rounded-1" style="max-width: 40px; height: auto;" />
+    </td> 
+    <td>@Technician.Name</td> 
+    <td>@Technician.Email</td> 
+    <td>@Technician.Phone</td> 
+    <td>@Technician.Birthdate</td> 
+    <td>@Technician.Gender</td> 
+    <td>@Technician.Specialty</td> 
+    <td class="text-nowrap" style="width: 1%;"> 
+        <div class="d-flex justify-content-center gap-2"> 
+            <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" @onclick="() => DetailCustomer(Technician.Id)">Detail</button> 
+            <button type="button" class="btn btn-outline-warning btn-sm fw-bold" @onclick="() => UpdateCustomer(Technician.Id)">Edit</button> 
+            <button type="button" class="btn btn-outline-success btn-sm fw-bold" @onclick="() => GetTechTickets(Technician.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Tickets</button> 
+            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @onclick="() => PrepareDelete(Technician.Id)" data-bs-toggle="modal" data-bs-target="#utilModal">Delete</button> 
+        </div> 
+    </td> 
+</tr> 
+
+
+@code {
+    [Parameter] 
+    public TechResponse Technician { get; set; } = null!;
+    [Parameter]
+    public EventCallback<Guid> OnDetailTechnician {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnDeleteTechnician {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnEditTechnician {get; set; }
+    
+    [Parameter]
+    public EventCallback<Guid> OnGetTechTickets {get; set; }
+
+
+    private async Task PrepareDelete(Guid id)
+    {
+        await OnDeleteTechnician.InvokeAsync(id);
+    }
+
+    private async Task DetailCustomer(Guid id)
+    {
+        await OnDetailTechnician.InvokeAsync(id);
+    }
+
+    private async Task UpdateCustomer(Guid id)
+    {
+        await OnEditTechnician.InvokeAsync(id);
+    }
+
+    private async Task GetTechTickets(Guid technicianId)
+    {
+        await OnGetTechTickets.InvokeAsync(technicianId);
+    }
+
+}
